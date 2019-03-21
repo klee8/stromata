@@ -1,2 +1,6 @@
 0_raw_data/Ee*
-1_QC/Ee_SolexaQC/*
+0_raw_data/genome_assembly
+1_QC/Ee_SolexaQA/*
+1_QC/E.elymi/*
+2_star_mapping/genomes/*
+2_star_mapping/logs/*

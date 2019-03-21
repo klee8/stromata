@@ -1,2 +1,24 @@
+Epichloe RNA-Seq project, Kate LEE
+started March 2019
 
-Data:
+AIM:
+  find differentially expressed transcripts in three different treatments of three different Epichloe-host symbiotic pairs
+  identify strain-specific clusters of secondary metabolites (especially those that are down-regulated in stroma)
+  see how psudostem expression compares with previous studies
+  find core set of genes that are always up/down regulated in stroma
+  find changes in the inflorescence vs psudostem (see which of these match stroma changes)
+
+DATA:
+  Epichloe - host examples
+    Ety_8: Epichloe typhina strain E8 (obligate stromata former)
+    Efe_2368: Epichloe festucae strain E2368
+    Eel_728: Epichloe elymi strain NFe728
+
+  David Winter's assemblies for each Epichloe strain
+    masked fasta file
+    gff3 files
+    annotations text files
+    protein fasta file
+    trascript fasta files
+
+  Epichloe illumina runs listed in stroma_files.csv
