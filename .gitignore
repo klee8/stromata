@@ -2,6 +2,7 @@
 0_raw_data/genome_assembly
 1_QC/E.elymi/*
 1_QC/Ee_SolexaQA/*
+1_QC/fastQC_raw/*
 2_star_mapping/_STARgenome/*
 2_star_mapping/_STARtmp/*
 2_star_mapping/genomes/*
