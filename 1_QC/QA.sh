@@ -1,6 +1,7 @@
 # Analyse read quality using SolexaQA++ v3.1.7.1
 # usage info at http://solexaqa.sourceforge.net/
 #################################################
+#!/usr/bin/env bash
 
 # make directories for QA output
 mkdir Ee_SolexaQA/Ee-Inf1_S14_L006_R1_001
