@@ -12,6 +12,7 @@
 # note transcripts in the gff3 file were identified as Parent items that end in T1, Parent items that don't end in T1 are genes
 # one canonical transcript per gene was annotated in this gff3 file
 # here identified transcripts in gff3 by looking at 'Parent' item
+# 
 #mkdir mappedfiles mappedfiles/INF1 mappedfiles/INF2 mappedfiles/INF3 mappedfiles/PS1 mappedfiles/PS2 mappedfiles/PS3 mappedfiles/STR1 mappedfiles/STR2 mappedfiles/STR3
 STAR --runMode alignReads --runThreadN 8 --genomeDir genomes/Eel_728/ --readFilesIn ../1_QC/E.elymi/Ee-Inf1_S14_L006_R1_001.fastq.trimmed.gz --readFilesCommand zcat --sjdbGTFfile genomes/Eel_728/Epichloe_elymi.gff3 --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent --outFileNamePrefix mappedfiles/INF1/E.elymi_Ee-Inf1_S14_L006_R1_001_
 STAR --runMode alignReads --runThreadN 8 --genomeDir genomes/Eel_728/ --readFilesIn ../1_QC/E.elymi/Ee-Inf2_S15_L006_R1_001.fastq.trimmed.gz --readFilesCommand zcat --sjdbGTFfile genomes/Eel_728/Epichloe_elymi.gff3 --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent --outFileNamePrefix mappedfiles/INF2/E.elymi_Ee-Inf2_S15_L006_R1_001_
