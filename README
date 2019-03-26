@@ -9,16 +9,30 @@ AIM:
   find changes in the inflorescence vs psudostem (see which of these match stroma changes)
 
 DATA:
-  Epichloe - host examples
+  Epichloe - host samples
     Ety_8: Epichloe typhina strain E8 (obligate stromata former)
     Efe_2368: Epichloe festucae strain E2368
     Eel_728: Epichloe elymi strain NFe728
 
   David Winter's assemblies for each Epichloe strain
-    masked fasta file
+    masked fasta file (genome)
     gff3 files
     annotations text files
     protein fasta file
-    trascript fasta files
+    trascript fasta files (transcriptome)
 
   Epichloe illumina runs listed in stroma_files.csv
+
+
+PIPELINE:
+  0_raw_data (mostly held in /opt/ due to space issues)
+  1_QC      initially tried SolexQC, but found this missed illumina adapters which were still on the threads
+            ran fastQC on all files
+            trimmomatic used to remove illumina adapters (TruSeq2 SE) and trim < phred 20 (SLIDINGWINDOW:5:20)
+            re-ran fastQC on trimmed files to check them
+  2_STAR    initially ran STAR against genome (found some new junctions). New splicing is not of interest so abandoned this.
+            Ran STAR against transcriptome (Salmon can also do this, but it seems better to do this with a
+            full read mapping algorithm and extract Epichloe reads first to minimise possibility of getting contaminant reads)
+  3_Salmon  random order bam file needed for use in Salmon (can randomise with samtools collate (orders by read name i.e. not in genome position order))
+            mapped bam files are not in positional order, use as they are. Salmon needs reads mapped to transcriptome. convert bam to fastq
+            Quant-map
