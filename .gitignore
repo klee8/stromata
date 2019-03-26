@@ -10,5 +10,6 @@
 2_star_mapping/genomes/*
 2_star_mapping/logs/*
 2_star_mapping/mappedfiles/*
+2_star_mapping/SolexaQA_mappedfiles/*
 2_star_mapping/R_mapping_exploratory_analysis/*
 .Rproj.user
