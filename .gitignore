@@ -12,4 +12,6 @@
 2_star_mapping/mappedfiles/*
 2_star_mapping/SolexaQA_mappedfiles/*
 2_star_mapping/R_mapping_exploratory_analysis/*
+3_salmon/transcriptome/*
+3_salmon/trial_salmon/*
 .Rproj.user
