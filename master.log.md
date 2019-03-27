@@ -51,7 +51,7 @@ STAR --runMode alignReads \
 --runThreadN 8 \
 --genomeDir genomes/Eel_728/ \      # NB on the forward slash for end of folder
 --readFilesIn ../1_QC/E.elymi/........ \
---readFilesCommand zcat \           # input in .gz files
+###--readFilesCommand zcat \           # input in .gz files took this out as trimmomatic output uncompressed files
 
 --sjdbGTFfile GFFfilepath \         # GTF/GFF3 file        
 --sjdbGTFfeatureExon exon \         # which feature to pull out (3rd column of gff file)
@@ -70,7 +70,7 @@ STAR --runMode alignReads --runThreadN 8 --genomeDir genomes/Eel_728/ --readFile
 
 
 
-###20180325
+###20180324
 ####overnight:
 STAR mapped first run E.elymi reads to genomes. Re-running PS1 due to missing gap in command line
 
@@ -96,18 +96,93 @@ sudo apt-get install libssl-dev
 sudo apt-get install libxml2-dev
 ```
 
+###20180325
+computer sluggish - Murray's assembly took up all the memory!
+
+####fastQC
+Ran FastQC on all raw files. (adapters still present)
+####trimmomatic
+ran trimmomatic on all raw fastq files, removed TrueSeq3 SE adapters, and < phred 20 over window of 5, chucked anything less than 40bp
+```
+java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 6 -trimlog trimmed/E.elymi/log/Ee-INF1_trim.log /opt/stroma_RNAseq/Ee-Inf1_S14_L006_R1_001.fastq.gz trimmed/E.elymi/Ee-Inf1_S14_L006_R1_001.trim.fastq ILLUMINACLIP:/home/kate/bin/Trimmomatic-0.38/adapters/TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:5:20 LEADING:5 TRAILING:5 MINLEN:40
+```
+re-ran fastQC on trimmed files
+
+###20180326
+
+####meeting
+meeting with Yonathan about his project
+he finishes in July, data comes in in 2-3 weeks, needs fast turnaround on Epichloe data to investigate further in the lab
+he has FL1 and mutants in a Lolium perenne background
+two histone mutants DsetB (K36) and DclrD (K39)
+we have the FL1 gene set and a 45K gene set for Lolium. Torben Asp in Denmark has a 70K gene set for Lolium.
+Data: 12 samples on 2 lanes of NOVAseq PE 150bp data. 90Gb raw data
+Samples are mock (cutting), wt, mutantsX2. Three replicates of each
+Samples were cut and innoculated (except mock) and harvested 3 days later. 600 samples in total, pooled into groups of 50 in order to get enough Epichloe in the samples (harvested just the innoculated area of the plant).
+
+Note, the mutants can infect the plants if inocculated with wt, suggesting that the fungus is excreting something that allows it to infect the plant. Plants were innoculated with the combination of mutant/wt died if the mutant grew vigourously.
+
+####mapping adapter-free reads with STAR
+changed some parameters: including --quantMode and removed zcat (trimmomatic output was not zipped)
+# note transcripts in the gff3 file were identified as Parent items that end in T1, Parent items that don't end in T1 are genes
+# one canonical transcript per gene was annotated in this gff3 file
+# here identified transcripts in gff3 by looking at 'Parent' item
+# --readFilesCommand zcat  read in zipped files
+# --sjdbGTFfile annotation GFF3 file
+# --sjdbGTFfeatureExon exon feature to read
+# --sjdbGTFtagExonParentTranscript Parent    the identifier for transcripts in th GFF3 file
+# --quantMode TranscriptomeSAM output SAM/BAM alignments to transcriptome into a separate file
+
+```
+STAR --runMode alignReads --runThreadN 4 --genomeDir genomes/Eel_728/ --readFilesIn ../1_QC/trimmed/E.elymi/Ee-Inf1_S14_L006_R1_001.trim.fastq --sjdbGTFfile genomes/Eel_728/Epichloe_elymi.gff3 --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent --outFileNamePrefix mappedfiles/INF1/E.elymi_Ee-Inf1_S14_L006_R1_001_  --quantMode TranscriptomeSAM
+
+```
+
+####bamtofastq of SolexaQCd reads to play with in salmon
+made a trial set of fastq reads to use Salmon in mapping mode
+
+####salmon
+ran initial test runs of Salmon - it is really fast
+was running in mapping mode, lots of reads (fragments) got thrown out, most likely due to presence of adapters especially for inflorescene Samples
+see output overview in 3_Salmon/trial_salmon/salmon_SolexaQCd_fastq_mapping.ods
+
+NOTE: read lior pachters take-down of Salmon/Sailfish etc. and the rebuttal.
+take home message - kallisto, sailfish and salmon have very similar output, gc content bias is addressed in Salmon
+
+####updated R in ubuntu
+change the /etc/apt/source.list (note needed to use bionic to match hosts in list)
+```
+sudo emacs /etc/apt/sources.list
+```
+add line:
+deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+update
+```
+sudo apt-get update
+sudo apt-get install r-base
+sudo apt-get install r-base-dev
+```
+
+#### installed DEseq2
+see 3_salmon/trial_salmon/E.elymi_DEseq2_trial
+
+
+
+####tomorrow
+start with looking back at fastQC output before and after
+
+
 ###DONE
 analyse quality of reads with SolexaQA++
 trim reads < phred 20
 map to Epichloe genomes with STAR
-
+re-do QC with Fastqc and trimmomatic
 
 ###TO DO
-re-do QC with Fastqc and trimmomatic
 re-map to genome
 quantify abundance with Salmon
-DE with DEseq2 and
-see if there is a grass genome to map to to remove plant material?
+DE with DEseq2
+see if there is a grass genome to map to to remove plant material?  Ryegrass (lolium) have 45K gene set (70K set in Denmark)
 remove bacterial and other genes?
 
 ###QUESTIONS
