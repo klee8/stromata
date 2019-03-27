@@ -14,4 +14,5 @@
 2_star_mapping/R_mapping_exploratory_analysis/*
 3_salmon/transcriptome/*
 3_salmon/trial_salmon/*
+3_salmon/trial_trim_files/*
 .Rproj.user
