@@ -13,6 +13,9 @@
 2_star_mapping/SolexaQA_mappedfiles/*
 2_star_mapping/R_mapping_exploratory_analysis/*
 3_salmon/transcriptome/*
-3_salmon/trial_salmon/*
-3_salmon/trial_trim_files/*
+3_salmon/trial_salmon_solexa_star/*
+3_salmon/trial_salmon_trim_star/*
+3_salmon/salmon_quant_basic/*
+3_salmon/salmon_quant/*
+3_salmon/E.elymi_DEseq2_trial/*
 .Rproj.user
