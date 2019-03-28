@@ -1,0 +1,22 @@
+---
+title: "E.elymi_DEseq2_trial"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("DESeq2", version = "3.8")
+
+#install.packages("tximport")
+#library("tximport")
+#library("readr")
+#library("tximportData")
+```
+
+```{r }
+
+data <- read.table("../")
+```
