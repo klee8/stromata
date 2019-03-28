@@ -23,10 +23,10 @@ mkdir trial_salmon_trim_star
 # --biasCorrect corrects for random hexamer bias in pcr priming
 # --useFSPD enables modeling of a position-specific fragment start distribution (bias from position in read) --useVBOpt --biasCorrect --useFSPD
 
-#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/INF1/E.elymi_Ee-Inf1_S14_L006_R1_001.trim.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_INF1_quant
-#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/INF2/E.elymi_Ee-Inf2_S15_L006_R1_001.trim.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_INF2_quant
-#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/PS1/E.elymi_Ee-PS1_S7_L007_R1_001.trim.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_PS1_quant
-salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/PS2/E.elymi_Ee-PS2_S8_L008_R1_001.trim.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_PS2_quant
+#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/INF1/E.elymi_Ee-Inf1_S14_L006_R1_001.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_INF1_quant
+#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/INF2/E.elymi_Ee-Inf2_S15_L006_R1_001.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_INF2_quant
+#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/PS1/E.elymi_Ee-PS1_S7_L007_R1_001.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_PS1_quant
+#salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../2_star_mapping/mappedfiles/PS2/E.elymi_Ee-PS2_S8_L008_R1_001.fastq --validateMappings --gcBias -o trial_salmon_trim_star/Epichloe_elymi_PS2_quant
 
 
 
