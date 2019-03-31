@@ -1,0 +1,143 @@
+---
+title: "E.elymi_DEseq2_PS_STR"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# DESeq2 installation
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("DESeq2", version = "3.8")
+
+# tximport installation
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("tximport", version = "3.8")
+
+# tximportData installation to see example data
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("tximportData", version = "3.8")
+
+#install.packages("readr")
+
+
+library("DESeq2")
+library("tximport")
+library("tximportData")
+library("readr")
+```
+
+Following example from http://127.0.0.1:11302/library/DESeq2/doc/DESeq2.html#transcript-abundance-files-and-tximport-input
+
+```{r get_data}
+
+# import sample list
+dir <- "../../3_salmon/salmon_quant_basic/"
+samples <- read.table(file.path(dir,"sample_list.txt"), header = TRUE)
+# sample$run is the folder you put the quant data in (rownames should be == sample$run)
+rownames(samples) <- samples$run
+samples
+
+# filter out INF
+samples <- samples[samples$condition != "INF",]
+samples
+```
+
+
+```{r example_cont}
+files <- file.path(dir, samples$run, "quant.sf")
+names(files) <- samples$run
+tx2gene <- read.table(file.path(dir, "../transcriptome/transcriptome.headers.txt"))
+colnames(tx2gene) <- c("TXNAME", "GENEID")
+tx2gene
+```
+
+
+```{r}
+txi <- tximport(files, type="salmon", tx2gene=tx2gene)
+```
+
+
+```{r}
+library("DESeq2")
+ddsTxi <- DESeqDataSetFromTximport(txi,
+                                   colData = samples,
+                                   design = ~ condition)
+```
+
+DESeq2 Analysis
+
+filter out data with less than 10 read counts
+```{r filter}
+keep <- rowSums(counts(ddsTxi)) >= 10
+ddsTxi <- ddsTxi[keep,]
+
+
+```
+
+if you never tell the DESeq2 functions which level you want to compare against (e.g. which level represents the control group), the comparisons will be based on the alphabetical order of the levels. Here just set the reference condition
+```{r set_ref_condition}
+ddsTxi$condition <- relevel(ddsTxi$condition, ref = "PS")
+#ddsTxi$condition <- factor(dds$condition, levels = c("PS","STR"))
+#dds$condition <- droplevels(dds$condition)
+
+```
+
+```{r DESeq}
+dds <- DESeq(ddsTxi)
+#colData(dds)
+res <- results(dds)
+res
+```
+```{r diff_gene_exp}
+summary(res) #summary of results
+```
+```{r summary_sorted_by_p}
+
+res <- res[order(res$padj),]
+head(res)
+
+
+#res <- res[order(res$log2FoldChange),]
+#head(res)
+```
+
+```{r plot_top_siz_diffs}
+
+par(mfrow=c(2,3))
+plotCounts(dds, gene="FUN_003546", intgroup="condition")
+plotCounts(dds, gene="FUN_003988", intgroup="condition")
+plotCounts(dds, gene="FUN_000262", intgroup="condition")
+plotCounts(dds, gene="FUN_004329", intgroup="condition")
+plotCounts(dds, gene="FUN_006599", intgroup="condition")
+plotCounts(dds, gene="FUN_000430", intgroup="condition")
+
+
+```
+
+
+```{r }
+
+#reset par
+par(mfrow=c(1,1))
+# Make a basic volcano plot
+with(res, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot", xlim=c(-3,3)))
+
+# Add colored points: blue if padj<0.01, red if log2FC>1 and padj<0.05)
+with(subset(res, padj<.01 ), points(log2FoldChange, -log10(pvalue), pch=20, col="blue"))
+with(subset(res, padj<.01 & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="red"))
+```
+
+```{r PCA}
+#First we need to transform the raw count data
+#vst function will perform variance stabilizing transformation
+
+vsdata <- vst(dds, blind=FALSE)
+
+
+plotPCA(vsdata, intgroup="condition") #using the DESEQ2 plotPCA fxn we can
+```
