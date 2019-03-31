@@ -1,6 +1,6 @@
 #KATE LEE logfile for Epichloe project
 
-###20180321
+###20180321 Thursday
 #### atom and git
 set up atom and git repository for Epichloe
 
@@ -28,7 +28,7 @@ STAR --runMode genomeGenerate --runThreadN 4 --genomeDir genomes/Eel_728 --genom
 
 
 
-###20180322
+###20180322  Friday
 ####overnight:
 3 PS and 3 STR E.elymi files from the first run were successfully trimmed overnight with SolexaQA++
 All files were analysed for initial quality with SolexaQA++
@@ -70,7 +70,7 @@ STAR --runMode alignReads --runThreadN 8 --genomeDir genomes/Eel_728/ --readFile
 
 
 
-###20180324
+###20180325 Monday
 ####overnight:
 STAR mapped first run E.elymi reads to genomes. Re-running PS1 due to missing gap in command line
 
@@ -96,7 +96,7 @@ sudo apt-get install libssl-dev
 sudo apt-get install libxml2-dev
 ```
 
-###20180325
+###20180326 Tuesday
 computer sluggish - Murray's assembly took up all the memory!
 
 ####fastQC
@@ -108,7 +108,7 @@ java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 6 -tr
 ```
 re-ran fastQC on trimmed files
 
-###20180326
+###20180327 Wednesday
 
 ####meeting
 meeting with Yonathan about his project
@@ -166,17 +166,38 @@ sudo apt-get install r-base-dev
 #### installed DEseq2
 see 3_salmon/trial_salmon/E.elymi_DEseq2_trial
 
-
-
 ####tomorrow
 start with looking back at fastQC output before and after
+
+
+###20180328 Thursday
+
+####overnight
+STAR mapped adapter trimmed reads for INF1 INF2 PS1, continuing with PS2 etc... on 8 processors
+
+####trial_salmon
+lots of reads got thrown out for SolexaQA trimmed data. Try trimmomatic trimmed + STAR mapped with -quant mode and also with mapped mode in salmon (get fastq from bam)
+(note there was an error in the bam to fastq for PS1 only [W::sam_read1] Parse error at line 10377917)
+-quant mode returns fewer mapped reads (except for PS2???????)
+
+Tried running trimmomatic fastq output directly with salmon
+-quant mode of Trimmomatic output gives similar number to fastq reads from trimmomatic+STAR bam files
+-i.e. broadly speaking a large overlap between STAR and Salmon mapping, but <10% unique to each mapper
+
+Ran basic quant options for salmon for all trimmomatic trimmed files
+```
+salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../1_QC/trimmed/E.elymi/Ee-Inf2_S15_L006_R1_001.trim.fastq --validateMappings --gcBias -o trial_trim_files/Epichloe_elymi_INF2_quant
+```
+
+
+
 
 
 ###DONE
 analyse quality of reads with SolexaQA++
 trim reads < phred 20
 map to Epichloe genomes with STAR
-re-do QC with Fastqc and trimmomatic
+re-do QC with Fastqc and trimmomatic (adapters removed, trimmed phred < 20 over window size 5)
 
 ###TO DO
 re-map to genome
