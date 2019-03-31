@@ -1,4 +1,4 @@
-# fastQC of reads prior to trimming
+# fastQC of reads after trimming
 
 #!/usr/bin/env bash
 mkdir fastQC_trimmed
