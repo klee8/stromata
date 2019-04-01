@@ -1,6 +1,6 @@
 #KATE LEE logfile for Epichloe project
 
-###20180321 Thursday
+###20190321 Thursday
 #### atom and git
 set up atom and git repository for Epichloe
 
@@ -28,7 +28,7 @@ STAR --runMode genomeGenerate --runThreadN 4 --genomeDir genomes/Eel_728 --genom
 
 
 
-###20180322  Friday
+###20190322  Friday
 ####overnight:
 3 PS and 3 STR E.elymi files from the first run were successfully trimmed overnight with SolexaQA++
 All files were analysed for initial quality with SolexaQA++
@@ -70,7 +70,7 @@ STAR --runMode alignReads --runThreadN 8 --genomeDir genomes/Eel_728/ --readFile
 
 
 
-###20180325 Monday
+###20190325 Monday
 ####overnight:
 STAR mapped first run E.elymi reads to genomes. Re-running PS1 due to missing gap in command line
 
@@ -96,7 +96,7 @@ sudo apt-get install libssl-dev
 sudo apt-get install libxml2-dev
 ```
 
-###20180326 Tuesday
+###20190326 Tuesday
 computer sluggish - Murray's assembly took up all the memory!
 
 ####fastQC
@@ -108,7 +108,7 @@ java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 6 -tr
 ```
 re-ran fastQC on trimmed files
 
-###20180327 Wednesday
+###20190327 Wednesday
 
 ####meeting
 meeting with Yonathan about his project
@@ -170,7 +170,7 @@ see 3_salmon/trial_salmon/E.elymi_DEseq2_trial
 start with looking back at fastQC output before and after
 
 
-###20180328 Thursday
+###20190328 Thursday
 
 ####overnight
 STAR mapped adapter trimmed reads for INF1 INF2 PS1, continuing with PS2 etc... on 8 processors
@@ -189,7 +189,21 @@ Ran basic quant options for salmon for all trimmomatic trimmed files
 salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../1_QC/trimmed/E.elymi/Ee-Inf2_S15_L006_R1_001.trim.fastq --validateMappings --gcBias -o trial_trim_files/Epichloe_elymi_INF2_quant
 ```
 
+###20190329 Friday
 
+made setup scripts for all files fastq, trimmomatic and salmon quant steps
+lab meeting 11-12.30
+postgraduate drinks and boardgames @ 4
+
+
+
+###20190401 Monday
+re did config files for automated setup
+back up all raw data files
+started trimmomatic and fastq of everything
+completed MPI assessment requirements
+
+DESeq2 - identify clusters
 
 
 
@@ -200,11 +214,27 @@ map to Epichloe genomes with STAR
 re-do QC with Fastqc and trimmomatic (adapters removed, trimmed phred < 20 over window size 5)
 
 ###TO DO
-re-map to genome
 quantify abundance with Salmon
 DE with DEseq2
+
+###ARCHIVED ideas
 see if there is a grass genome to map to to remove plant material?  Ryegrass (lolium) have 45K gene set (70K set in Denmark)
 remove bacterial and other genes?
 
 ###QUESTIONS
 what is masked in the Epichloe genome assembly 'masked' fasta files?
+what are the unidentified samples in the illumina run?
+what is the estimated fragment length in salmon?
+How does STAR differ from bwa?
+###Other Questions:
+How do you assess genome re-shuffling?
+
+####POSSIBLE FUTURE PROJECTs:
+Indonesian data set
+  - look at admixtures
+Epichloe genomics (whole genomes available, hiC and expression data)
+  - see how whole genomes re-shuffle
+    - suspect it may happen at repetitive elements
+  - look at gene expression in parents and hybrids. Any deviation from the expected value may be under selection?
+    - personally I think there are too many variables in this, random noise from disruption of regulatory systems etc. would feature heavily. You would need a lot of replicates to support any possible selection.
+    - need to know more about how hybridisation works.
