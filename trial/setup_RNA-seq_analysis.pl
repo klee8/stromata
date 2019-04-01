@@ -33,21 +33,21 @@ open(FQCR, ">1_QC/fastqc_raw.sh") || die "ERROR, couldn't open 1_QC/fastqc_raw.s
 print FQCR "# fastQC of reads prior to trimming
 
 #!/usr/bin/env bash
-source .bash_profile
+source /home/kate/.bash_profile
 mkdir fastQC_raw\n";
 
 open(FQCT, ">1_QC/fastqc_trimmed.sh") || die "ERROR, couldn't open 1_QC/fastqc_trimmed.sh: $!";
 print FQCT "# fastQC of reads after trimming
 
 #!/usr/bin/env bash
-source .bash_profile
+source /home/kate/.bash_profile
 mkdir fastQC_trimmed\n";
 
 open(TRIM, ">1_QC/trimmomatic.sh") || die "ERROR, couldn't open 1_QC/fastqc_trimmed.sh: $!";
 print TRIM "# trim reads including adapters
 
 #!/usr/bin/env bash
-source .bash_profile
+source /home/kate/.bash_profile
 
 # Trim data
 
