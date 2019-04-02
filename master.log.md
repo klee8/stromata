@@ -202,8 +202,28 @@ re did config files for automated setup
 back up all raw data files
 started trimmomatic and fastq of everything
 completed MPI assessment requirements
+meeting with Murray - from now on at 1pm on Mondays
+  - figure out any skills you want career wise
+  - learn to use Docker
+  - continue with python learning
+  - next job?
+  - conferences to target
+  - if you want to stay here, give seminars around the country
 
-DESeq2 - identify clusters
+
+###20190402 Tuesday
+broke up trimmomatic commands, run two lots over 4 threads each.
+md5sums created for raw data. data moved to external hard drive and checked.
+Looking at Docker documentation
+DESeq2 - identifed clusters (with info from GFF3 files), the data is pretty fragmented
+
+talked with David about next moves:
+  issue: fragmented genome, can't find all gene clusters
+    - occultercut to identify AT rich (i.e. most likely repeat regions) to look for genes that have been separated by repeat regions and may have been part of the same cluster
+    - bwa alignment of E.elymi against more complete genome (David has pacbio data) to see if some segments are near enough to have genes from the same cluster
+    - note, repeat-masker put the soft masking on transcriptome fasta files. Most likely masked default library of repeats
+  issue: identifying genes
+    - check interproscan for domains of genes of interest - can put these through GO terms
 
 
 
@@ -216,14 +236,16 @@ re-do QC with Fastqc and trimmomatic (adapters removed, trimmed phred < 20 over 
 ###TO DO
 quantify abundance with Salmon
 DE with DEseq2
+identify clusters
+characterise genes of interest
 
 ###ARCHIVED ideas
 see if there is a grass genome to map to to remove plant material?  Ryegrass (lolium) have 45K gene set (70K set in Denmark)
 remove bacterial and other genes?
 
 ###QUESTIONS
-what is masked in the Epichloe genome assembly 'masked' fasta files?
-what are the unidentified samples in the illumina run?
+what is masked in the Epichloe genome assembly 'masked' fasta files? - repeat-masker default library
+what are the unidentified samples in the illumina run? ones where the bar code couldn't be identified
 what is the estimated fragment length in salmon?
 How does STAR differ from bwa?
 ###Other Questions:
@@ -233,7 +255,7 @@ How do you assess genome re-shuffling?
 Indonesian data set
   - look at admixtures
 Epichloe genomics (whole genomes available, hiC and expression data)
-  - see how whole genomes re-shuffle
+  - see how whole genomes re-shuffle (see GenomeVista)
     - suspect it may happen at repetitive elements
   - look at gene expression in parents and hybrids. Any deviation from the expected value may be under selection?
     - personally I think there are too many variables in this, random noise from disruption of regulatory systems etc. would feature heavily. You would need a lot of replicates to support any possible selection.
