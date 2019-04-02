@@ -36,7 +36,7 @@ Following example from http://127.0.0.1:11302/library/DESeq2/doc/DESeq2.html#tra
 ```{r get_data}
 
 # import sample list
-dir <- "../../3_salmon/salmon_quant_basic/"
+dir <- "../../2_salmon/salmon_quant_basic"
 samples <- read.table(file.path(dir,"sample_list.txt"), header = TRUE)
 # sample$run is the folder you put the quant data in (rownames should be == sample$run)
 rownames(samples) <- samples$run

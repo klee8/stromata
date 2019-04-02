@@ -24,11 +24,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #install.packages("readr")
 
+#install.packages("tidyverse")
+
 
 library("DESeq2")
 library("tximport")
 library("tximportData")
 library("readr")
+library("tidyverse")
 ```
 
 Following example from http://127.0.0.1:11302/library/DESeq2/doc/DESeq2.html#transcript-abundance-files-and-tximport-input
@@ -36,7 +39,7 @@ Following example from http://127.0.0.1:11302/library/DESeq2/doc/DESeq2.html#tra
 ```{r get_data}
 
 # import sample list
-dir <- "../../3_salmon/salmon_quant_basic/"
+dir <- "../../2_salmon/salmon_quant_basic/"
 samples <- read.table(file.path(dir,"sample_list.txt"), header = TRUE)
 # sample$run is the folder you put the quant data in (rownames should be == sample$run)
 rownames(samples) <- samples$run
@@ -100,10 +103,6 @@ summary(res) #summary of results
 
 res <- res[order(res$padj),]
 head(res)
-
-
-#res <- res[order(res$log2FoldChange),]
-#head(res)
 ```
 
 ```{r plot_top_siz_diffs}
@@ -138,6 +137,39 @@ with(subset(res, padj<.01 & abs(log2FoldChange)>2), points(log2FoldChange, -log1
 
 vsdata <- vst(dds, blind=FALSE)
 
-
 plotPCA(vsdata, intgroup="condition") #using the DESEQ2 plotPCA fxn we can
+```
+
+
+Get data from gff3 file
+ID genes that are over 2 fold change that are close to one another
+
+```{r ID_clusters}
+
+positions <- read.table("../../0_raw_data/genome_assembly/Eel_728/Epichloe_elymi.gff3", header = FALSE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+colnames(positions) <- c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
+
+# select out mRNA (these are the ones with product described)
+mRNA <- positions[positions$type == "mRNA",]
+
+# split attributes to get c("trans_id", "gene_id", "product")
+temp <- str_split(mRNA$attributes, ";", n=3)
+df <- as.data.frame(t(as.data.frame(temp)))
+rownames(df)<-NULL
+mRNA[, c("trans_id", "gene_id", "product")] <- df
+mRNA$trans_id <- str_replace(mRNA$trans_id, "ID=", "")
+mRNA$gene_id <- str_replace(mRNA$gene_id, "Parent=", "")
+mRNA$product <- str_replace(mRNA$product, "product=", "")
+mRNA
+
+# subset target results that have an adjusted pvalue less than .01 and a log2FoldChange >2
+targets <- rownames(subset(res, padj<.01 & abs(log2FoldChange)>2))
+targets
+
+
+GOI <- mRNA[mRNA$gene_id %in% targets,]
+table <- GOI %>% group_by(seqid, start)
+
+write.table(table, "E.elymi_PS_STR_log_fold_change_2.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+
 ```
