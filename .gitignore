@@ -16,4 +16,5 @@ archive/*
 3_DESeq2/E.elymi/*
 trial/1_QC/*
 trial/2_salmon/*
+*.ods
 .Rproj.user
