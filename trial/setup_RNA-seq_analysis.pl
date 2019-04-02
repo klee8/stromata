@@ -99,8 +99,9 @@ mkdir salmon_quant
 # Salmon usage
 # build an indices of the transcriptomes
 # -k 31 suggested for reads over 75bp
-salmon index -t transcriptome/Epichloe_elymi.transcripts.fa -i transcriptome/E.elymi.trans_index -k 31
-
+salmon index -t transcriptome/E.elymi/Epichloe_elymi.transcripts.fa -i transcriptome/E.elymi/E.elymi.trans_index -k 31
+salmon index -t transcriptome/E.festucae/Epichloe_festucae.transcripts.fa -i transcriptome/E.festucae/E.festucae.trans_index -k 31
+salmon index -t transcriptome/E.typhina/Epichloe_typhina.transcripts.fa -i transcriptome/E.typhina/E.typhina.trans_index -k 31
 
 ##########  QUANT OPTION (quasi-mapping and counting)
 # -l U for single-end (unstranded) librarytype
@@ -116,7 +117,7 @@ foreach my $species (sort keys %config){
   print QUANT "mkdir salmon_quant/$species\n";
   foreach my $basesamplename (sort keys %{$config{$species}}){
     my $cond = $config{$species}{$basesamplename}{'condition'} ;
-    print QUANT "salmon quant -p 8 -i transcriptome/$species.trans_index -l U -r <(zcat ../1_QC/trimmed/$species/$basesamplename.trim.fastq) --validateMappings --seqBias --gcBias --posBias --writeUnmappedNames -o salmon_quant/$species/$basesamplename.quant\n";
+    print QUANT "salmon quant -p 8 -i transcriptome/$species/$species.trans_index -l U -r <(zcat ../1_QC/trimmed/$species/$basesamplename.trim.fastq) --validateMappings --seqBias --gcBias --posBias --writeUnmappedNames -o salmon_quant/$species/$basesamplename.quant\n";
   }
 }
 
