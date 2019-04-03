@@ -101,7 +101,7 @@ mkdir salmon_quant
 # -k 31 suggested for reads over 75bp
 salmon index -t transcriptome/E.elymi/Epichloe_elymi.transcripts.fa -i transcriptome/E.elymi/E.elymi.trans_index -k 31
 salmon index -t transcriptome/E.festucae/Epichloe_festucae.transcripts.fa -i transcriptome/E.festucae/E.festucae.trans_index -k 31
-salmon index -t transcriptome/E.typhina/Epichloe_typhina.transcripts.fa -i transcriptome/E.typhina/E.typhina.trans_index -k 31
+salmon index -t transcriptome/E.typhina/Epichloe_typhina_E8.transcripts.fa -i transcriptome/E.typhina/E.typhina_E8.trans_index -k 31
 
 ##########  QUANT OPTION (quasi-mapping and counting)
 # -l U for single-end (unstranded) librarytype
