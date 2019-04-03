@@ -57,7 +57,7 @@ source /home/kate/.bash_profile
 #LEADING:5         removes low quality bases from the start of a read
 #TRAILING:5        removes low quality bases from the end of a read
 #MINLEN:40         removes reads shorter than this
-
+# note: stopped outputting the trimlog, I don't use it and it takes up a LOT of space.
 mkdir trimmed
 \n";
 
@@ -71,7 +71,7 @@ foreach my $species (sort keys %config){
     my $lane_num = $config{$species}{$basesamplename}{'lane'} ;
     print FQCR "zcat $raw_dir/$run_number/$lane_num/$basesamplename.fastq.gz  | fastqc stdin --outdir=fastQC_raw/$species\n";
     print FQCT "fastqc trimmed/$species/$basesamplename.trim.fastq.gz --outdir=fastQC_trimmed/$species\n";
-    print TRIM "java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 4 -trimlog trimmed/$species/logs/$basesamplename.trim.log $raw_dir/$run_number/$lane_num/$basesamplename.fastq.gz trimmed/$species/$basesamplename.trim.fastq.gz ILLUMINACLIP:/home/kate/bin/Trimmomatic-0.38/adapters/TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:5:20 LEADING:5 TRAILING:5 MINLEN:40\n";
+    print TRIM "java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 4 $raw_dir/$run_number/$lane_num/$basesamplename.fastq.gz trimmed/$species/$basesamplename.trim.fastq.gz ILLUMINACLIP:/home/kate/bin/Trimmomatic-0.38/adapters/TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:5:20 LEADING:5 TRAILING:5 MINLEN:40\n";
   }
 }
 
