@@ -170,6 +170,6 @@ targets
 GOI <- mRNA[mRNA$gene_id %in% targets,]
 table <- GOI %>% group_by(seqid, start)
 
-write.table(table, "E.elymi_PS_STR_log_fold_change_2.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+write.table(table, "E.elymi_PS_STR_log2foldchange.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
 ```
