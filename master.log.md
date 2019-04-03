@@ -227,6 +227,16 @@ talked with David about next moves:
 
 
 
+###20190403 Wednesday
+fire alarm :o
+set up salmon_quant.sh and started running it
+set fastqc_trimmed.sh running
+identified some books for learning python in library
+  - good habits for great coding ~ Michael Stueben
+  - learn to program with python 3 ~ Irv Kalb
+  - practical programming ~ Paul Gries, Jennifer Campbell
+renamed typhina to typhina_E8, may need to do the same for the other Epichloe species
+
 ###DONE
 analyse quality of reads with SolexaQA++
 trim reads < phred 20
@@ -238,6 +248,13 @@ quantify abundance with Salmon
 DE with DEseq2
 identify clusters
 characterise genes of interest
+issue: fragmented genome, can't find all gene clusters
+  - occultercut to identify AT rich (i.e. most likely repeat regions) to look for genes that have been separated by repeat regions and may have been part of the same cluster
+  - bwa alignment of E.elymi against more complete genome (David has pacbio data) to see if some segments are near enough to have genes from the same cluster
+  - note, repeat-masker put the soft masking on transcriptome fasta files. Most likely masked default library of repeats
+issue: identifying genes
+  - check interproscan for domains of genes of interest - can put these through GO terms
+
 
 ###ARCHIVED ideas
 see if there is a grass genome to map to to remove plant material?  Ryegrass (lolium) have 45K gene set (70K set in Denmark)
