@@ -194,6 +194,7 @@ salmon quant -p 8 -i transcriptome/Epichloe_elymi_trans_index -l U -r ../1_QC/tr
 made setup scripts for all files fastq, trimmomatic and salmon quant steps
 lab meeting 11-12.30
 postgraduate drinks and boardgames @ 4
+lab dinner @ 6
 
 
 
@@ -237,14 +238,41 @@ identified some books for learning python in library
   - practical programming ~ Paul Gries, Jennifer Campbell
 renamed typhina to typhina_E8, may need to do the same for the other Epichloe species
 
+
+###20190404 Thursday
+Added strain to species name in folder structure
+md5sum QC'd data (done) and move to external hard drive (done) and re-check md5sums
+md5sum Salmon_quant data (done) and copy to external hard drive (done) and re-check md5sums
+check fastqc files
+get list of salmon warnings (e.g. when there aren't enough fragments to estimate length, or --gcbias experimental for SE data)
+set up DESeq2 analysis for all STROMA project files
+
+get transcriptome header names:
+```
+grep '>' Epichloe_elymi_E728.transcripts.fa > transcriptome.headers.txt
+sed -i 's/>//g' transcriptome.headers.txt
+```
+
+
+
+
+
+
+
+
+
+
+
+
 ###DONE
 analyse quality of reads with SolexaQA++
 trim reads < phred 20
 map to Epichloe genomes with STAR
 re-do QC with Fastqc and trimmomatic (adapters removed, trimmed phred < 20 over window size 5)
+quantify abundance with Salmon
+
 
 ###TO DO
-quantify abundance with Salmon
 DE with DEseq2
 identify clusters
 characterise genes of interest
