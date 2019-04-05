@@ -13,7 +13,9 @@ archive/*
 2_salmon/salmon_quant_basic/*
 2_salmon/salmon_quant/*
 2_salmon/E.elymi_DEseq2_trial/*
-3_DESeq2/E.elymi/*
+3_DESeq2/*/*.txt
+3_DESeq2/*.txt
+3_DESeq2/*.R*
 trial/1_QC/*
 trial/2_salmon/*
 *.ods
