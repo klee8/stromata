@@ -18,5 +18,7 @@ archive/*
 3_DESeq2/*.R*
 trial/1_QC/*
 trial/2_salmon/*
+*.fna
+*.csv
 *.ods
 .Rproj.user
