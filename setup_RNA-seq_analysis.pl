@@ -2,8 +2,8 @@
 
 # require config file with info on fastq files grouped in biological replicates by tissue and spp
 # config file with 7 columns (as in DESeq), no headers in file:
-# species centre  assay basesamplename  experiment  run(foldername) condition(tissue)
-# E.elymi NA ILLUM  Ee-Inf1_S14_L006_R1_001 STROMA  E.elymi_INF1  INF
+# species centre  assay run_num(when samples sent for re-sequencing) lane sample  experiment  run(illumina run fq base filename) condition(tissue)
+# E.elymi_NfE728	NA	ILLUM	first_run	Lane6	E.elymi_NfE728_INF1	STROMA	Ee-Inf1_S14_L006_R1_001	INF
 
 #!usr/bin/perl
 use strict;
@@ -19,11 +19,11 @@ my %config;
 while(<IN>){
   #print $_;
   chomp;
-  my ($species, $centre, $assay, $run_num, $lane, $basesamplename, $experiment, $run, $condition) = split("\t", $_);
-  $config{$species}{$basesamplename}{$condition} = $_;
-  $config{$species}{$basesamplename}{'condition'} = $condition;
-  $config{$species}{$basesamplename}{'run_number'} = $run_num;
-  $config{$species}{$basesamplename}{'lane'} = $lane;
+  my ($species, $centre, $assay, $run_num, $lane, $sample, $experiment, $run, $condition) = split("\t", $_);
+  $config{$species}{$run}{$condition} = $_;
+  $config{$species}{$run}{'condition'} = $condition;
+  $config{$species}{$run}{'run_number'} = $run_num;
+  $config{$species}{$run}{'lane'} = $lane;
 }
 
 ################################# make Quality control folders and set up QC scripts
@@ -58,7 +58,7 @@ source /home/kate/.bash_profile
 #TRAILING:5        removes low quality bases from the end of a read
 #MINLEN:40         removes reads shorter than this
 # note: stopped outputting the trimlog, I don't use it and it takes up a LOT of space.
-# note: stdin was overwriting itself in the fastqc_raw/$species output directory - added $basesamplename as an extra folder in the path
+# note: stdin was overwriting itself in the fastqc_raw/$species output directory - added $run as an extra folder in the path
 mkdir trimmed
 \n";
 
@@ -66,13 +66,13 @@ foreach my $species (sort keys %config){
   print FQCR "mkdir fastQC_raw/$species\n";
   print FQCT "mkdir fastQC_trimmed/$species\n";
   print TRIM "mkdir trimmed/$species trimmed/$species/logs\n";
-  foreach my $basesamplename (sort keys %{$config{$species}}){
-    my $cond = $config{$species}{$basesamplename}{'condition'} ;
-    my $run_number = $config{$species}{$basesamplename}{'run_number'} ;
-    my $lane_num = $config{$species}{$basesamplename}{'lane'} ;
-    print FQCR "zcat $raw_dir/$run_number/$lane_num/$basesamplename.fastq.gz  | fastqc stdin --outdir=fastQC_raw/$species/$basesamplename\n";
-    print FQCT "fastqc trimmed/$species/$basesamplename.trim.fastq.gz --outdir=fastQC_trimmed/$species\n";
-    print TRIM "java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 4 $raw_dir/$run_number/$lane_num/$basesamplename.fastq.gz trimmed/$species/$basesamplename.trim.fastq.gz ILLUMINACLIP:/home/kate/bin/Trimmomatic-0.38/adapters/TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:5:20 LEADING:5 TRAILING:5 MINLEN:40\n";
+  foreach my $run (sort keys %{$config{$species}}){
+    my $cond = $config{$species}{$run}{'condition'} ;
+    my $run_number = $config{$species}{$run}{'run_number'} ;
+    my $lane_num = $config{$species}{$run}{'lane'} ;
+    print FQCR "zcat $raw_dir/$run_number/$lane_num/$run.fastq.gz  | fastqc stdin --outdir=fastQC_raw/$species/$run\n";
+    print FQCT "fastqc trimmed/$species/$run.trim.fastq.gz --outdir=fastQC_trimmed/$species\n";
+    print TRIM "java -jar /home/kate/bin/Trimmomatic-0.38/trimmomatic-0.38.jar SE -threads 4 $raw_dir/$run_number/$lane_num/$run.fastq.gz trimmed/$species/$run.trim.fastq.gz ILLUMINACLIP:/home/kate/bin/Trimmomatic-0.38/adapters/TruSeq3-SE.fa:2:30:10 SLIDINGWINDOW:5:20 LEADING:5 TRAILING:5 MINLEN:40\n";
   }
 }
 
@@ -104,6 +104,10 @@ salmon index -t transcriptome/E.elymi_NfE728/Epichloe_elymi_NfE728.transcripts.f
 salmon index -t transcriptome/E.festucae_E2368/Epichloe_festucae_E2368.transcripts.fa -i transcriptome/E.festucae/E.festucae_E2368.trans_index -k 31
 salmon index -t transcriptome/E.typhina_E8/Epichloe_typhina_E8.transcripts.fa -i transcriptome/E.typhina_E8/E.typhina_E8.trans_index -k 31
 
+
+# grab headers from transriptome files for use in mapping transcripts to genes later
+for i in transcriptome/*; do grep '>' \$i/*.fa > \$i/transcriptome.headers.txt; sed -i s'/>//g' \$i/transcriptome.headers.txt; done
+
 ##########  QUANT OPTION (quasi-mapping and counting)
 # -l U for single-end (unstranded) librarytype
 # -r for SE fq file
@@ -116,9 +120,9 @@ salmon index -t transcriptome/E.typhina_E8/Epichloe_typhina_E8.transcripts.fa -i
 
 foreach my $species (sort keys %config){
   print QUANT "mkdir salmon_quant/$species\n";
-  foreach my $basesamplename (sort keys %{$config{$species}}){
-    my $cond = $config{$species}{$basesamplename}{'condition'} ;
-    print QUANT "salmon quant -p 8 -i transcriptome/$species/$species.trans_index -l U -r <(zcat ../1_QC/trimmed/$species/$basesamplename.trim.fastq) --validateMappings --seqBias --gcBias --posBias -o salmon_quant/$species/$basesamplename\n";
+  foreach my $run (sort keys %{$config{$species}}){
+    my $cond = $config{$species}{$run}{'condition'} ;
+    print QUANT "salmon quant -p 8 -i transcriptome/$species/$species.trans_index -l U -r <(zcat ../1_QC/trimmed/$species/$run.trim.fastq) --validateMappings --seqBias --gcBias --posBias -o salmon_quant/$species/$run\n";
   }
 }
 
