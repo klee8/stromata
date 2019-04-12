@@ -60,11 +60,13 @@ samples
 
 
 ```{r example_cont}
-dir <- "../../2_salmon/salmon_quant"
-files <- file.path(dir, samples$pop, samples$sample, "quant.sf")
+dir <- "../../2_salmon"
+# use external HD files
+dir <- "/mnt/usb-Seagate_Expansion_NAA7H6EA-0:0-part2/Epichloe/2_salmon"
+files <- file.path(dir,"salmon_quant", samples$pop, samples$sample, "quant.sf")
 names(files) <- samples$sample
 
-tx2gene <- read.table(file.path(dir, "../transcriptome/E.elymi_E728/transcriptome.headers.txt"))
+tx2gene <- read.table(file.path(dir, "transcriptome/E.elymi_E728/transcriptome.headers.txt"))
 colnames(tx2gene) <- c("TXNAME", "GENEID")
 tx2gene
 ```
@@ -120,12 +122,12 @@ head(res)
 ```{r plot_top_siz_diffs}
 
 par(mfrow=c(2,3))
+plotCounts(dds, gene="FUN_000621", intgroup="condition")
+plotCounts(dds, gene="FUN_001518", intgroup="condition")
+plotCounts(dds, gene="FUN_001928", intgroup="condition")
+plotCounts(dds, gene="FUN_003127", intgroup="condition")
+plotCounts(dds, gene="FUN_003281", intgroup="condition")
 plotCounts(dds, gene="FUN_003546", intgroup="condition")
-plotCounts(dds, gene="FUN_003988", intgroup="condition")
-plotCounts(dds, gene="FUN_000262", intgroup="condition")
-plotCounts(dds, gene="FUN_004329", intgroup="condition")
-plotCounts(dds, gene="FUN_006599", intgroup="condition")
-plotCounts(dds, gene="FUN_000430", intgroup="condition")
 ```
 
 
@@ -179,7 +181,7 @@ targets
 
 GOI <- mRNA[mRNA$gene_id %in% targets,]
 table <- GOI %>% group_by(seqid, start)
-
+table
 write.table(table, "E.elymi_INF_STR_log2foldchange.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
 ```
