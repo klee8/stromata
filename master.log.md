@@ -241,28 +241,103 @@ renamed typhina to typhina_E8, may need to do the same for the other Epichloe sp
 
 ###20190404 Thursday
 Added strain to species name in folder structure
-md5sum QC'd data (done) and move to external hard drive (done) and re-check md5sums
-md5sum Salmon_quant data (done) and copy to external hard drive (done) and re-check md5sums
-check fastqc files
-get list of salmon warnings (e.g. when there aren't enough fragments to estimate length, or --gcbias experimental for SE data)
-set up DESeq2 analysis for all STROMA project files
-
+md5sum QC'd data (done) and move to external hard drive (done) and re-check md5sums (done -scripts have been changed)
+md5sum Salmon_quant data (done) and copy to external hard drive (done) and re-check md5sums (done)
 get transcriptome header names:
 ```
 grep '>' Epichloe_elymi_E728.transcripts.fa > transcriptome.headers.txt
 sed -i 's/>//g' transcriptome.headers.txt
 ```
+set up and ran DESeq2 analysis for all STROMA project files
+set up Yonathan's QC
 
 
+###20190405 Friday
+continued Yonathan's QC (ran out of memory overnight)
+removed STROMA qc and salmon files (just kept DESeq results)
+
+set up bwa alignment of E.elymi_E728 to E.elymi_NfE732 and E.festucae_E2368 to E.festucae_Fl1
+setup script to run Yonathan's fastqc, salmon, and the genome alignments over the weekend.
+setup DESeq for Yonathan's files
 
 
+###20190408 Monday
+meeting with Murray:
+  current work: DE done for STROMA and almost for Yonathans
+  this week: find clusters, blast against closely related genomes, look at repeat regions
+  for Barry: create tables, write methods section ahead of time, think about visualisations for paper.
+  check out upsetR - replacement for venn diagrams
+  Plant DE: look at Pierre Dupont's paper and Jann Schmit 2017 (Schmid, J., R. Day, N. Zhang, P.-Y. Dupont, M.P. Cox, C.L. Schardl, N. Minards, M. Truglio, N. Moore, D.R. Harris and Y. Zhou. 2017. Host tissue environment directs activities of an Epichloë endophyte, while it induces systemic hormone and defense responses in its native perennial ryegrass host. Molecular Plant-Microbe Interactions 30:138-149. PDF, Supplemental Materials
+  Sci-com: the conversation, media training,
+  Grant writing: marsden Feb 2020, 3 year post
+  Career possibilities: check out centres like CSL in Melbourne, John Innes centre, CRIs here in NZ
+
+  Data available here:
+  species of Epichloe: Fl1, Elymi, Amerillans, Clarkii, Typhina (and Elymi-Amerillans hybrids). These species of Epichloe span the whole genus.
+  Sequencing data: Pacbio available for all, nanopore for some, PE illumina for all (Murray is currently trying to use pacbio and nanopore to assemble elymi - perhaps with canoe?)
+  Gene Epression data: available for Elymi and Amerillans (harvested at 6 weeks)
+  HiC data: small amount, getting more, enough there to see if centromeres are maintained between strains
+
+  Epichloe Genomes and potential questions:
+  Seem to have meso synteny - are the re-arrangements within or between chromosomes
+  Parents have 7 chromosomes that are raggedly shuffled
+  centromeres are epigenetically coded with proteins (not motifs in the DNA)
+  are centromere locations maintained between strains
+  Q: Fl1 centromeres are always in repeat regions - is this the same for other strains?
+  Q: why have 7 chromosomes if they are re-shuffling, what is the mechanism?
+  - see what is lost between species and where, see what is gained between species and where
+  Q: what does the shuffling look like and are the centromeres moving around?
+  Lots of novel genes in Epichloe - don't know what they do, no homologs in Genbank
+  Q: do novel genes have shared/known domains
+  Q: are novel genes more likely to be found near repeat regions
+  Q: is there a connection between genome re-shuffling and the formation of novel genomes
+  Assembly:
+  Q: is there a way to code for how contigs should line up in assemblies?
 
 
+###20190309 Tuesday
+Rstudio keeps crashing. moved to an older version
+David suggests for counts of zero, take the lowest number of counts in the dataset, divide by an arbitrary number and use this in place of zero (this prevents secondary metabolite genes which are only expressed in one tissue from dropping out of the dataset)
+note, only need this for visualisations afterwards.... if you don't have the raw data
+May need to run his annotation pipeline when he is away.
+Annotations from Funannote already include all M3 data annotations (but M3 genenames not in ortholog files).
+
+###20190310 Wednesday
+Got DE gene for Yonathan's dataset
+Got core gene set for Yonathan's dataset
+Note, Yonathan wants normalised count data and protein length in his table and preferably M3 gene names also.
+
+###20190311 Thursday
+merged count data to give mean for each condition
+got normalised count data (this doesn't have both normalisation steps -re check), standardised annotation section of script
+
+###20190312  Friday
+core set UpSetR graph
+lab meeting - Derek has identified a gene that mediates Arabidopsis response to light
+meeting with Barry, Daniel, Murray and Yonathan:
+  Yonathan needs Signal P data and M3 mapping
+  Need to get normalised read count data correct
+  Get DE for Stromata PS -> STROMA
+  comparative genomics:
+  - only use genomes that are published or can be published
+  - show presence/absence of stroma genes for other Epichloe Genomes and closely/distantly related Genomes
+  - Look at dn/ds ratio of core gene set for sexual vs asexual genes to show if there is selection on them
+  David's annotation pipeline for E.typhina and E.clarkii may need to be completed if he is called away
+  Put scripts on github for each paper
+  is it worthwhile to put pipelines on Docker?
 
 
-
-
-
+next week:
+  Signal P data and M3 mapping
+  Need to get normalised read count data correct
+  make a table of DE genes for STROMA data
+  find core set of genes for STROMA data
+  get list of salmon warnings (e.g. when there aren't enough fragments to estimate length, or --gcbias experimental for SE data)
+  check fastqc files for STROMA Data
+  python wrapper for the pipeline.
+  setup a docker env for the pipeline
+  write documentation.
+  occultercut
 
 ###DONE
 analyse quality of reads with SolexaQA++
@@ -270,10 +345,13 @@ trim reads < phred 20
 map to Epichloe genomes with STAR
 re-do QC with Fastqc and trimmomatic (adapters removed, trimmed phred < 20 over window size 5)
 quantify abundance with Salmon
-
+DE with DEseq2
+Got DE gene for Yonathan's dataset
+Got core gene set for Yonathan's dataset
+merged count data to give mean for each condition
+got normalised count data, standardised annotation section of script
 
 ###TO DO
-DE with DEseq2
 identify clusters
 characterise genes of interest
 issue: fragmented genome, can't find all gene clusters
