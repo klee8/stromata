@@ -16,6 +16,7 @@ archive/*
 3_DESeq2/*/*.txt
 3_DESeq2/*.txt
 3_DESeq2/*.R*
+4_cluster_identification/*
 trial/1_QC/*
 trial/2_salmon/*
 *.fna
