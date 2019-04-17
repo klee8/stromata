@@ -327,6 +327,14 @@ meeting with Barry, Daniel, Murray and Yonathan:
   is it worthwhile to put pipelines on Docker?
 
 
+###20190415 Monday
+  Read DESeq manuals repeatedly
+
+
+
+
+
+
 next week:
   Signal P data and M3 mapping
   Need to get normalised read count data correct
@@ -338,6 +346,11 @@ next week:
   setup a docker env for the pipeline
   write documentation.
   occultercut
+
+
+
+
+
 
 ###DONE
 analyse quality of reads with SolexaQA++
