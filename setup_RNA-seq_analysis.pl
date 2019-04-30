@@ -12,7 +12,7 @@ use warnings;
 
 my $config = $ARGV[0];
 my $deseq_compare = $ARGV[1];
-my $raw_dir = $ARGV[2] || "/opt/stroma_RNAseq";
+my $raw_dir = $ARGV[2] || "0_raw_data";
 
 
 open(IN, "<$config") || die "ERROR, please provide config file: $!";

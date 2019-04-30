@@ -1,15 +1,15 @@
-Epichloe RNA-Seq project, Kate LEE
-started March 2019
+#Epichloe stroma RNA-Seq project analysis, Kate Lee, 2019
 
 AIM:
-  find differentially expressed transcripts in three different treatments of three different Epichloe-host symbiotic pairs
-  identify strain-specific clusters of secondary metabolites (especially those that are down-regulated in stroma)
-  see how psudostem expression compares with previous studies
-  find core set of genes that are always up/down regulated in stroma
-  find changes in the inflorescence vs psudostem (see which of these match stroma changes)
+  Find differentially expressed transcripts in three different treatments of three different Epichloe-host symbiotic pairs
+  Find core set of genes that are always up/down regulated in stroma
+  Find changes in the inflorescence vs psudostem (and see which of these match stroma changes)
+  Identify strain-specific clusters of secondary metabolites (especially those that are down-regulated in stroma)
+  Compare psudostem expression with previous studies
+
 
 DATA:
-  Epichloe - host samples
+  Epichloe samples
     E.typhina_E8: Epichloe typhina strain E8 (obligate stromata former), from Rikers. Causes choke on ryegrass.
       454 sequencing available for this strain (from Chris) see 2013 comparative geneome paper.
     E.festucae_E2368: Epichloe festucae strain E2368, created by Chris Shardel by crossing E189 X E434 and backcrossing
