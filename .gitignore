@@ -5,8 +5,6 @@ archive/*
 3_DESeq2/*
 4_cluster_identification/*
 archive/*
-*.fna
-*.csv
 *.ods
 genes_of_interest.txt
 master.log.md
