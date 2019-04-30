@@ -11,11 +11,13 @@ use warnings;
 
 
 my $config = $ARGV[0];
-my $raw_dir = "/opt/stroma_RNAseq";
+my $deseq_compare = $ARGV[1];
+my $raw_dir = $ARGV[2] || "/opt/stroma_RNAseq";
+
+
 open(IN, "<$config") || die "ERROR, please provide config file: $!";
 
 my %config;
-
 while(<IN>){
   #print $_;
   chomp;
@@ -58,7 +60,7 @@ source /home/kate/.bash_profile
 #TRAILING:5        removes low quality bases from the end of a read
 #MINLEN:40         removes reads shorter than this
 # note: stopped outputting the trimlog, I don't use it and it takes up a LOT of space.
-# note: stdin was overwriting itself in the fastqc_raw/$species output directory - added $run as an extra folder in the path
+# note: stdin was overwriting itself in the fastqc_raw/\$species output directory - added \$run as an extra folder in the path
 mkdir trimmed
 \n";
 
@@ -88,10 +90,9 @@ open(QUANT, ">2_salmon/salmon_quant.sh") || die "ERROR, couldn't open salmon_qua
 
 
 print QUANT "# Salmon mapping and read count quantification
+# make sure Salmon software is in the PATH
 
 #!/usr/bin/env bash
-
-# make sure Salmon software is in the PATH
 source /home/kate/.bash_profile
 
 #
@@ -126,4 +127,33 @@ foreach my $species (sort keys %config){
   }
 }
 
-print "CAUTION: Ensure the transcriptomes in 2_salmon/salmon_quant.sh script match the species you are looking at\n"
+print "CAUTION: Ensure the transcriptomes in 2_salmon/salmon_quant.sh script match the species you are looking at\n";
+
+################################# setup DEseq2
+`mkdir 3_DESeq2`;
+
+# read in list of DESeq2 comparisons to make
+# file with one line for each comparison with three tab delimited columns
+# (species, condition to compare (SOI), reference condition (REF))
+open(DESEQ, "<$deseq_compare") || die "ERROR, couldn't open $deseq_compare: $!";
+my %comparisons;
+while(<DESEQ>) {
+  chomp;
+  my ($spp, $cond, $ref) = split("\t", $_);
+  my $job = join("_", $cond, $ref);
+  $comparisons{$spp}{$job} = 1;
+}
+
+# set up file structure and print Rmd files for each comparison
+open(TEMP, ">3_DESeq2/temp.sh") || die "ERROR, couldn't open temporary file for DESeq2: $!";
+foreach my $species (sort keys %comparisons){
+  print TEMP "mkdir $species\n";
+  foreach my $job (sort keys %{$comparisons{$species}}) {
+    my ($cond, $ref) = split("_", $job);
+    print "COND = $cond; REF = $ref\n";
+    print TEMP "cp ../Generic_DESeq2.Rmd $species/$species.DESeq2.$cond.$ref.Rmd\n";
+    print TEMP "sed -i \"s/SPECIES/$species/g\" $species/$species.DESeq2.$cond.$ref.Rmd\n";
+    print TEMP "sed -i \"s/SOI/$cond/g\" $species/$species.DESeq2.$cond.$ref.Rmd\n";
+    print TEMP "sed -i \"s/REF/$ref/g\" $species/$species.DESeq2.$cond.$ref.Rmd\n";
+  }
+}
