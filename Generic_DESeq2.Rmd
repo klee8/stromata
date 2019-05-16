@@ -181,7 +181,7 @@ plotPCA <- function (object, intgroup = "condition", ntop = 500, returnData = FA
       #coord_fixed()
 }
 
-pdf("plots/SOI_v_REF_PCA_plot_rld-normalised_data.pdf", onefile = FALSE)
+pdf("plots/SOI_vs_REF_PCA_plot_rld-normalised_data.pdf", onefile = FALSE)
 plotPCA(rld, intgroup="condition")
 while (!is.null(dev.list()))  dev.off()
 ```
@@ -304,7 +304,7 @@ colnames(mean_fpkm) <- paste(colnames(mean_fpkm), "fpkm", sep = "_")
 mean_fpkm <- as.data.frame(base::cbind(gene_id = fpkm_counts$gene_id, mean_fpkm, deparse.level = 0))
 all_results <- merge(all_results, mean_fpkm, by="gene_id")
 
-# merge data after apeglm shrinkage 
+# merge data after apeglm shrinkage
 resApeT_thresh1$gene_id <- rownames(resApeT_thresh1)
 resApeT_thresh2$gene_id <- rownames(resApeT_thresh2)
 all_apeglmT <- merge(as.data.frame(resApeT_thresh1), as.data.frame(resApeT_thresh2), by = "gene_id")
