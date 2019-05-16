@@ -4,6 +4,11 @@ archive/*
 2_salmon/*
 3_DESeq2/*
 4_cluster_identification/*
+BLAST/*
+EffectorP/*
+pannzer/*
+SignalP/*
+INTERPRO/*
 archive/*
 *.ods
 genes_of_interest.txt
