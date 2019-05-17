@@ -1,5 +1,5 @@
 # Epichloe stroma RNA-Seq project analysis #
-### Kate Lee, 2019 ###
+### Kate Lee, 2019 ### changes
 
 AIM:
   Find differentially expressed transcripts in three different treatments of three different Epichloe-host symbiotic pairs
