@@ -10,6 +10,7 @@ pannzer/*
 SignalP/*
 INTERPRO/*
 archive/*
+setup_DESeq_analysis.pl
 *.ods
 genes_of_interest.txt
 master.log.md
