@@ -11,6 +11,7 @@ SignalP/*
 INTERPRO/*
 archive/*
 setup_DESeq_analysis.pl
+Generic_DESeq2.Rmd
 *.ods
 genes_of_interest.txt
 master.log.md
