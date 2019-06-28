@@ -43,11 +43,11 @@ orthology <- read.table("flat_ortho_file.txt", header = TRUE)
 orthology$gene_id <- gsub("-T1", "", orthology$gene_id)
 
 #elymi[elymi$elymi_gene_id != "*",]
-elymi <- merge(elymi, orthology[, c("ortho_group", "spp", "gene_id")], by.x = "elymi_gene_id", by.y = "gene_id")
-festucae <- merge(festucae, orthology[, c("ortho_group", "spp", "gene_id")], by.x = "festucae_gene_id", by.y = "gene_id")
-typhina <- merge(typhina, orthology[, c("ortho_group", "spp", "gene_id")], by.x = "typhina_gene_id", by.y = "gene_id")
+elymi <- merge(elymi, orthology[, c("ortho_group",  "gene_id")], by.x = "elymi_gene_id", by.y = "gene_id")
+festucae <- merge(festucae, orthology[, c("ortho_group",  "gene_id")], by.x = "festucae_gene_id", by.y = "gene_id")
+typhina <- merge(typhina, orthology[, c("ortho_group", "gene_id")], by.x = "typhina_gene_id", by.y = "gene_id")
 
-# elymi includes 96 rows with missing protein (e.g. tRNA) that didn't go through orthoprotein 
+# note elymi includes 96 rows with missing protein (e.g. tRNA) that didn't go through orthoprotein 
 
 str(orthology)
 str(elymi)  
@@ -66,16 +66,16 @@ core_set <- merge(core_set, typhina, by = "ortho_group", all = TRUE)
 ## add number of species the ortho_group is present in (i.e. 1/2/3 of elymi, festucae and typhina)
 num_orth <- read.table("lookup_ortholog_groups.txt", header = TRUE)
 num_orth <- num_orth %>% select(orthogroup, elymi, fescuae, typhina) %>% mutate(num_spp = rowSums(. != "*") - 1)
-core_set <- merge(num_orth[, c("orthogroup", "num_spp")], core_set, by.x = "orthogroup", by.y = "ortho_group", all = TRUE)
-
 # add m3 number so Chris' annotations can be looked up easily
 m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
 m3 <- m3[, c("orthogroup", "m3")]
-core_set <- merge(core_set, m3, by.x = "orthogroup", by.y = "orthogroup", all = FALSE)
+num_orth <- merge(num_orth[, c("orthogroup", "num_spp")], m3, by.x = "orthogroup", by.y = "orthogroup", all = TRUE)
+
+core_set <- merge(num_orth, core_set, by.x = "orthogroup", by.y = "ortho_group", all = TRUE)
 
 rownames(core_set) <- core_set$group
-colnames(core_set)
 str(core_set)
+str(num_orth)
 ```
 
 
@@ -211,14 +211,15 @@ colnames(festucae_ann) <- paste("festucae", colnames(festucae_ann), sep = "_")
 colnames(typhina_ann) <- paste("typhina", colnames(typhina_ann), sep = "_")
 
 # merge DESeq output 
-core_set <- merge(core_set, typhina_ann, by.x = "typhina_gene_id", by.y = "typhina_GeneID", all.x = TRUE)
-core_set <- merge(core_set, festucae_ann, by.x = "festucae_gene_id", by.y = "festucae_GeneID", all.x = TRUE)
 core_set <- merge(core_set, elymi_ann, by.x = "elymi_gene_id", by.y = "elymi_GeneID", all.x = TRUE)
+core_set <- merge(core_set, festucae_ann, by.x = "festucae_gene_id", by.y = "festucae_GeneID", all.x = TRUE)
+core_set <- merge(core_set, typhina_ann, by.x = "typhina_gene_id", by.y = "typhina_GeneID", all.x = TRUE)
+
+core_set <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",       "festucae_gene_id",       "typhina_gene_id",                "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",     "elymi_mean_STR_TPM",  "elymi_mean_PS_TPM",    "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue",   "festucae_mean_STR_TPM",  "festucae_mean_PS_TPM",   "typhina_apeglm_log2FC",   "typhina_apeglm_lfcSE",    "typhina_apeglm_1_svalue", "typhina_apeglm_2_svalue",     "typhina_mean_STR_TPM",   "typhina_mean_PS_TPM",   "core_up",                 "core_down",               "top_4FC_up",              "top_4FC_down",   "top_2FC_up",  "top_2FC_down",  "elymi_Start",             "elymi_Stop",              "elymi_Strand",            "elymi_Name",              "elymi_Product",          "elymi_BUSCO",             "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",   "elymi_Translation",  "elymi_protein_length",    "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",    "festucae_Translation",         "festucae_protein_length", "elymi_Feature",       "elymi_Contig",             "typhina_Feature",         "typhina_Contig",          "typhina_Start",           "typhina_Stop",            "typhina_Strand",         "typhina_Name",  "typhina_Product", "typhina_BUSCO",           "typhina_PFAM",            "typhina_InterPro",        "typhina_EggNog",      "typhina_COG",             "typhina_GO.Terms",        "typhina_Secreted",        "typhina_Membrane",        "typhina_Protease",        "typhina_CAZyme",         "typhina_Notes",  "typhina_Translation",      "typhina_protein_length" ) ]
 
 str(core_set)
-  write.table(core_set, "STR_PS/core_gene_set_STR_PS.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
-#core_set_ann <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",       "festucae_gene_id",       "typhina_gene_id",                "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",     "elymi_mean_STR_TPM",  "elymi_mean_PS_TPM",    "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue",   "festucae_mean_STR_TPM",  "festucae_mean_PS_TPM",   "typhina_apeglm_log2FC",   "typhina_apeglm_lfcSE",    "typhina_apeglm_1_svalue", "typhina_apeglm_2_svalue",     "typhina_mean_STR_TPM",   "typhina_mean_PS_TPM",   "core_up",                 "core_down",               "top_4FC_up",              "top_4FC_down",   "top_2FC_up",  "top_2FC_down",  "elymi_Start",             "elymi_Stop",              "elymi_Strand",            "elymi_Name",              "elymi_Product",          "elymi_BUSCO",             "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",    "elymi_protein_length",    "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",             "festucae_protein_length", "elymi_Feature",       "elymi_Contig",             "typhina_Feature",         "typhina_Contig",          "typhina_Start",           "typhina_Stop",            "typhina_Strand",         "typhina_Name",  "typhina_Product", "typhina_BUSCO",           "typhina_PFAM",            "typhina_InterPro",        "typhina_EggNog",      "typhina_COG",             "typhina_GO.Terms",        "typhina_Secreted",        "typhina_Membrane",        "typhina_Protease",        "typhina_CAZyme",         "typhina_Notes",        "typhina_protein_length" ) ]
+write.table(core_set, "STR_PS/core_gene_set_STR_PS_ann.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
 #core_set_trans <- core_set[ , c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",  "typhina_gene_id",  "elymi_Contig", "elymi_Start", "elymi_Stop", "elymi_Strand",  "elymi_Translation", "elymi_protein_length", "festucae_Contig",  "festucae_Start", "festucae_Stop",  "festucae_Strand", "festucae_Translation", "festucae_protein_length", "typhina_Contig", "typhina_Start",  "typhina_Stop", "typhina_Strand",  "typhina_Translation", "typhina_protein_length"  )]
 
@@ -300,6 +301,9 @@ core_set_pann <- merge(core_set_pann, pan_keep, by.x = "typhina_gene_id", by.y =
 head(core_set_pann)
 str(core_set_pann)
 colnames(core_set_pann)
+
+core_set_pann <- core_set_pann[, c("orthogroup", "num_spp", "m3", "elymi_gene_id", "festucae_gene_id", "typhina_gene_id", "elymi_apeglm_log2FC", "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_PS_TPM", "elymi_mean_STR_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", "festucae_apeglm_1_svalue","festucae_apeglm_2_svalue","festucae_mean_PS_TPM",  "festucae_mean_STR_TPM",  "typhina_apeglm_log2FC",  "typhina_apeglm_lfcSE",  "typhina_apeglm_1_svalue", "typhina_apeglm_2_svalue", "typhina_mean_PS_TPM", "typhina_mean_STR_TPM",  "core_up", "core_down",  "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down", "el_Pr_signalP", "el_sigP_pos", "el_sigP_clev", "el_Pr_sigP_clev",  "fe_Pr_signalP", "fe_sigP_pos", "fe_sigP_clev", "fe_Pr_sigP_clev",  "ty_Pr_signalP", "ty_sigP_pos", "ty_sigP_clev", "ty_Pr_sigP_clev", "el_effectorP", "el_efP_Pr",  "fe_effectorP", "fe_efP_Pr",  "ty_effectorP", "ty_efP_Pr",  "el_pannzer_desc", "el_pannzer_genename", "fe_pannzer_desc",  "fe_pannzer_genename", "ty_pannzer_desc",  "ty_pannzer_genename")]
+
 
 write.table(core_set_pann, "STR_PS/core_gene_set_STR_PS_pannzer.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 ```

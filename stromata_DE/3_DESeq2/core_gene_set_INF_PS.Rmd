@@ -194,12 +194,12 @@ head(core_set)
 core_set <- merge(core_set, festucae_ann, by.x = "festucae_gene_id", by.y = "festucae_GeneID", all.x = TRUE)
 core_set <- merge(core_set, elymi_ann, by.x = "elymi_gene_id", by.y = "elymi_GeneID", all.x = TRUE)
 
-core_set$elymi_gene_id
-colnames(core_set)
+core_set <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",   "elymi_apeglm_log2FC",  "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_INF_TPM",  "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM",   "core_up",                 "core_down",               "top_4FC_up",              "top_4FC_down",   "top_2FC_up",  "top_2FC_down", "elymi_Feature", "elymi_Contig",  "elymi_Start",  "elymi_Stop", "elymi_Strand", "elymi_Name", "elymi_Product", "elymi_BUSCO", "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",  "elymi_Translation",  "elymi_protein_length",  "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",             "festucae_Translation", "festucae_protein_length" ) ]
+
+str(core_set)
 
 write.table(core_set, "INF_PS/core_gene_set_INF_PS_ann.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
-#core_set_ann <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",   "elymi_apeglm_log2FC",  "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_INF_TPM",  "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM",  "elymi_Feature", "elymi_Contig",  "elymi_Start",  "elymi_Stop", "elymi_Strand", "elymi_Name", "elymi_Product", "elymi_BUSCO", "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",    "elymi_protein_length",  "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",             "festucae_protein_length" ) ]
 
 #core_set_trans <- core_set[ , c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",  "elymi_Contig", "elymi_Start", "elymi_Stop", "elymi_Strand",  "elymi_Translation", "elymi_protein_length", "festucae_Contig",  "festucae_Start", "festucae_Stop",  "festucae_Strand", "festucae_Translation", "festucae_protein_length")]
 
@@ -265,6 +265,8 @@ core_set_pann <- merge(core_set_pann, pan_keep, by.x = "festucae_gene_id", by.y 
 head(core_set_pann)
 str(core_set_pann)
 colnames(core_set_pann)
+
+core_set_pann <- core_set_pann[, c("orthogroup", "num_spp", "m3", "elymi_gene_id", "festucae_gene_id", "elymi_gene_id", "elymi_apeglm_log2FC", "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue", "elymi_apeglm_2_svalue", "elymi_mean_INF_TPM", "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue","festucae_mean_INF_TPM", "festucae_mean_PS_TPM", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down", "el_Pr_signalP", "el_sigP_pos", "el_sigP_clev", "el_Pr_sigP_clev", "fe_Pr_signalP", "fe_sigP_pos", "fe_sigP_clev", "fe_Pr_sigP_clev", "el_effectorP", "el_efP_Pr", "fe_effectorP", "fe_efP_Pr", "el_pannzer_desc", "el_pannzer_genename", "fe_pannzer_desc", "fe_pannzer_genename")]
 
 write.table(core_set_pann, "INF_PS/core_gene_set_INF_PS_pannzer.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
