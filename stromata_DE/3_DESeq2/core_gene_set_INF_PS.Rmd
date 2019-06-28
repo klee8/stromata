@@ -53,6 +53,15 @@ core_set <- merge(elymi, festucae, by = "ortho_group", all = TRUE)
 num_orth <- read.table("lookup_ortholog_groups.txt", header = TRUE)
 num_orth <- num_orth %>% select(orthogroup, elymi, fescuae, typhina) %>% mutate(num_spp = rowSums(. != "*") - 1)
 core_set <- merge(num_orth[, c("orthogroup", "num_spp")], core_set, by.x = "orthogroup", by.y = "ortho_group", all = TRUE)
+
+# add m3 number so Chris' annotations can be looked up easily
+m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
+m3 <- m3[, c("orthogroup", "m3")]
+core_set <- merge(core_set, m3, by.x = "orthogroup", by.y = "orthogroup", all = FALSE)
+
+rownames(core_set) <- core_set$group
+colnames(core_set)
+str(core_set)
 ```
 
 
@@ -190,9 +199,9 @@ colnames(core_set)
 
 write.table(core_set, "INF_PS/core_gene_set_INF_PS_ann.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
-#core_set_ann <- core_set[, c("elymi_gene_id",  "festucae_gene_id",  "ortho_group",  "elymi_apeglm_log2FC",  "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_INF_TPM",  "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM",  "elymi_Feature", "elymi_Contig",  "elymi_Start",  "elymi_Stop", "elymi_Strand", "elymi_Name", "elymi_Product", "elymi_BUSCO", "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",    "elymi_protein_length",  "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",             "festucae_protein_length" ) ]
+#core_set_ann <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",   "elymi_apeglm_log2FC",  "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_INF_TPM",  "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM",  "elymi_Feature", "elymi_Contig",  "elymi_Start",  "elymi_Stop", "elymi_Strand", "elymi_Name", "elymi_Product", "elymi_BUSCO", "elymi_PFAM",              "elymi_InterPro",          "elymi_EggNog",            "elymi_COG",     "elymi_GO.Terms",   "elymi_Secreted",  "elymi_Membrane",   "elymi_Protease",    "elymi_CAZyme",  "elymi_Notes",    "elymi_protein_length",  "festucae_Feature",        "festucae_Contig",         "festucae_Start",         "festucae_Stop",           "festucae_Strand",         "festucae_Name",           "festucae_Product",        "festucae_BUSCO",          "festucae_PFAM",          "festucae_InterPro",       "festucae_EggNog",         "festucae_COG",            "festucae_GO.Terms",       "festucae_Secreted",       "festucae_Membrane",      "festucae_Protease",       "festucae_CAZyme",         "festucae_Notes",             "festucae_protein_length" ) ]
 
-#core_set_trans <- core_set[ , c("elymi_gene_id",  "festucae_gene_id",  "ortho_group", "elymi_Contig", "elymi_Start", "elymi_Stop", "elymi_Strand",  "elymi_Translation", "elymi_protein_length", "festucae_Contig",  "festucae_Start", "festucae_Stop",  "festucae_Strand", "festucae_Translation", "festucae_protein_length")]
+#core_set_trans <- core_set[ , c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",  "elymi_Contig", "elymi_Start", "elymi_Stop", "elymi_Strand",  "elymi_Translation", "elymi_protein_length", "festucae_Contig",  "festucae_Start", "festucae_Stop",  "festucae_Strand", "festucae_Translation", "festucae_protein_length")]
 
 
 #write.table(core_set_ann, "INF_PS/core_gene_set_INF_PS_ann.txt", quote = FALSE, row.names = FALSE, sep = "\t")
@@ -205,7 +214,7 @@ write.table(core_set, "INF_PS/core_gene_set_INF_PS_ann.txt", quote = FALSE, row.
 
 ```{r pannzer_ann}
 
-core_set_pann <- core_set[, c("orthogroup",   "num_spp", "elymi_gene_id",       "festucae_gene_id",         "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_INF_TPM",       "elymi_mean_PS_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM",    "festucae_mean_PS_TPM",  "core_up",  "core_down", "top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
+core_set_pann <- core_set[, c("orthogroup",   "num_spp", "m3",  "elymi_gene_id",       "festucae_gene_id",         "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_INF_TPM",       "elymi_mean_PS_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM",    "festucae_mean_PS_TPM",  "core_up",  "core_down", "top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
 
 # add SignalP annotations
 signalP <- read.delim("../SignalP/E.elymi_NfE728_signalP.txt", header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
@@ -249,9 +258,9 @@ colnames(pan_keep) <- paste("fe", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
 # add M3 set ortholog numbers
-m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
-m3 <- m3[, c("orthogroup", "m3")]
-core_set_pann <- merge(core_set_pann, m3, by.x = "orthogroup", by.y = "orthogroup", all = FALSE)
+#m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
+#m3 <- m3[, c("orthogroup", "m3")]
+#core_set_pann <- merge(core_set_pann, m3, by.x = "orthogroup", by.y = "orthogroup", all = FALSE)
 
 head(core_set_pann)
 str(core_set_pann)
