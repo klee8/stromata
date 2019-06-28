@@ -37,9 +37,8 @@ colnames(festucae) <- paste("festucae", colnames(festucae), sep = "_")
 orthology <- read.table("flat_ortho_file.txt", header = TRUE)
 orthology$gene_id <- gsub("-T1", "", orthology$gene_id)
 
-#elymi[elymi$elymi_gene_id != "*",]
-elymi <- merge(elymi, orthology[, c("ortho_group", "spp", "gene_id")], by.x = "elymi_gene_id", by.y = "gene_id")
-festucae <- merge(festucae, orthology[, c("ortho_group", "spp", "gene_id")], by.x = "festucae_gene_id", by.y = "gene_id")
+elymi <- merge(elymi, orthology[, c("ortho_group", "gene_id")], by.x = "elymi_gene_id", by.y = "gene_id")
+festucae <- merge(festucae, orthology[, c("ortho_group", "gene_id")], by.x = "festucae_gene_id", by.y = "gene_id")
 
 ```
 
@@ -49,9 +48,11 @@ festucae <- merge(festucae, orthology[, c("ortho_group", "spp", "gene_id")], by.
 # merge result tables
 core_set <- merge(elymi, festucae, by = "ortho_group", all = TRUE)
 
-rownames(core_set) <- core_set$group
-colnames(core_set)
-core_set[is.na(core_set$group),]
+
+## add number of species the ortho_group is present in (i.e. 1/2/3 of elymi, festucae and typhina)
+num_orth <- read.table("lookup_ortholog_groups.txt", header = TRUE)
+num_orth <- num_orth %>% select(orthogroup, elymi, fescuae, typhina) %>% mutate(num_spp = rowSums(. != "*") - 1)
+core_set <- merge(num_orth[, c("orthogroup", "num_spp")], core_set, by.x = "orthogroup", by.y = "ortho_group", all = TRUE)
 ```
 
 
@@ -204,7 +205,7 @@ write.table(core_set, "INF_PS/core_gene_set_INF_PS_ann.txt", quote = FALSE, row.
 
 ```{r pannzer_ann}
 
-core_set_pann <- core_set[, c("elymi_gene_id",       "festucae_gene_id",      "ortho_group",             "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_INF_TPM",       "elymi_mean_PS_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM",    "festucae_mean_PS_TPM",  "core_up",  "core_down", "top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
+core_set_pann <- core_set[, c("orthogroup",   "num_spp", "elymi_gene_id",       "festucae_gene_id",         "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_INF_TPM",       "elymi_mean_PS_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_INF_TPM",    "festucae_mean_PS_TPM",  "core_up",  "core_down", "top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
 
 # add SignalP annotations
 signalP <- read.delim("../SignalP/E.elymi_NfE728_signalP.txt", header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
@@ -250,7 +251,7 @@ core_set_pann <- merge(core_set_pann, pan_keep, by.x = "festucae_gene_id", by.y 
 # add M3 set ortholog numbers
 m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
 m3 <- m3[, c("orthogroup", "m3")]
-core_set_pann <- merge(core_set_pann, m3, by.x = "ortho_group", by.y = "orthogroup", all = FALSE)
+core_set_pann <- merge(core_set_pann, m3, by.x = "orthogroup", by.y = "orthogroup", all = FALSE)
 
 head(core_set_pann)
 str(core_set_pann)
