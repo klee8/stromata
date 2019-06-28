@@ -1,7 +1,0 @@
-E.elymi_NfE728	STR	PS
-E.elymi_NfE728	STR	INF
-E.elymi_NfE728	INF	PS
-E.festucae_E2368	STR	PS
-E.festucae_E2368	STR	INF
-E.festucae_E2368	INF	PS
-E.typhina_E8	STR	PS
