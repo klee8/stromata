@@ -268,7 +268,7 @@ core_set_pann <- core_set_pann[, c( "orthogroup", "num_spp","m3", "elymi_gene_id
 
 write.table(core_set_pann, "STR_INF/core_gene_set_STR_INF_pannzer.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
-```
+  ```
 
 ##### ARCHIVED
 
