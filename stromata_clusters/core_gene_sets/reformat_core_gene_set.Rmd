@@ -14,15 +14,15 @@ library(tidyverse)
 ```{r get_data_str_ps}
 
 str_ps <- read.delim("core_gene_set_STR_PS_ann.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-str_ps_ele <- str_ps %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue)
-str_ps_ele <- str_ps_elymi[!is.na(str_ps_elymi$elymi_gene_id),] 
-colnames(str_ps_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
-str_ps_fes <- str_ps %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue)
+str_ps_ele <- str_ps %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue) %>% mutate(species = "elymi")
+str_ps_ele <- str_ps_ele[!is.na(str_ps_ele$elymi_gene_id),] 
+colnames(str_ps_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
+str_ps_fes <- str_ps %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue) %>% mutate(species = "festucae")
 str_ps_fes <- str_ps_fes[!is.na(str_ps_fes$festucae_gene_id),]   
-colnames(str_ps_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
-str_ps_typ <- str_ps %>% select(typhina_Contig, typhina_Start, typhina_Stop, typhina_gene_id, orthogroup, typhina_apeglm_log2FC, typhina_apeglm_lfcSE, typhina_apeglm_1_svalue, typhina_apeglm_2_svalue)
+colnames(str_ps_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
+str_ps_typ <- str_ps %>% select(typhina_Contig, typhina_Start, typhina_Stop, typhina_gene_id, orthogroup, typhina_apeglm_log2FC, typhina_apeglm_lfcSE, typhina_apeglm_1_svalue, typhina_apeglm_2_svalue) %>% mutate(species = "typhina")
 str_ps_typ <- str_ps_typ[!is.na(str_ps_typ$typhina_gene_id),]    
-colnames(str_ps_typ) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
+colnames(str_ps_typ) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
 str_ps_rfmt <- rbind(str_ps_ele, str_ps_fes, str_ps_typ)
 
 write.table(str_ps_rfmt, "core_genes_STR_PS_rfmt.txt", quote = FALSE, sep = "\t")
@@ -31,12 +31,12 @@ write.table(str_ps_rfmt, "core_genes_STR_PS_rfmt.txt", quote = FALSE, sep = "\t"
 ```{r get_data_str_inf}
 
 str_inf <- read.delim("core_gene_set_STR_INF_ann.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-str_inf_ele <- str_inf %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue)
+str_inf_ele <- str_inf %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue)  %>% mutate(species = "elymi")
 str_inf_ele <- str_inf_ele[!is.na(str_inf_ele$elymi_gene_id),] 
-colnames(str_inf_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
-str_inf_fes <- str_inf %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue)
+colnames(str_inf_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
+str_inf_fes <- str_inf %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue) %>% mutate(species = "festucae")
 str_inf_fes <- str_inf_fes[!is.na(str_inf_fes$festucae_gene_id),]   
-colnames(str_inf_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
+colnames(str_inf_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
 str_inf_rfmt <- rbind(str_inf_ele, str_inf_fes)
 
 write.table(str_inf_rfmt, "core_genes_STR_INF_rfmt.txt", quote = FALSE, sep = "\t")
@@ -45,12 +45,12 @@ write.table(str_inf_rfmt, "core_genes_STR_INF_rfmt.txt", quote = FALSE, sep = "\
 ```{r get_data_inf_ps}
 
 inf_ps <- read.delim("core_gene_set_INF_PS_ann.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-inf_ps_ele <- inf_ps %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue)
+inf_ps_ele <- inf_ps %>% select(elymi_Contig, elymi_Start, elymi_Stop, elymi_gene_id, orthogroup,  elymi_apeglm_log2FC, elymi_apeglm_lfcSE, elymi_apeglm_1_svalue, elymi_apeglm_2_svalue) %>% mutate(species = "elymi")
 inf_ps_ele <- inf_ps_ele[!is.na(inf_ps_ele$elymi_gene_id),] 
-colnames(inf_ps_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
-inf_ps_fes <- inf_ps %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue)
+colnames(inf_ps_ele) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
+inf_ps_fes <- inf_ps %>% select(festucae_Contig, festucae_Start, festucae_Stop, festucae_gene_id, orthogroup, festucae_apeglm_log2FC, festucae_apeglm_lfcSE, festucae_apeglm_1_svalue, festucae_apeglm_2_svalue) %>% mutate(species = "festucae")
 inf_ps_fes <- inf_ps_fes[!is.na(inf_ps_fes$festucae_gene_id),]   
-colnames(inf_ps_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2")
+colnames(inf_ps_fes) <- c("contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species")
 inf_ps_rfmt <- rbind(inf_ps_ele, inf_ps_fes)
 
 write.table(inf_ps_rfmt, "core_genes_INF_PS_rfmt.txt", quote = FALSE, sep = "\t")
