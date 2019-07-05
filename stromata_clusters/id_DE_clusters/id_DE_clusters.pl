@@ -54,8 +54,9 @@ my $gapflag = 0;
 
 # identify initial genes in clusters
 foreach my $spp (sort keys %raw){
+  print "species: $spp\n";
   foreach my $chromosome (sort keys %{$raw{$spp}}){
-    #print "chromosome: $chromosome\n";                     #### ;)
+    print "\tchromosome: $chromosome\n";                     #### ;)
     my $prev = 0; my $svalue_1; my $svalue_2;
     foreach my $start_pos (sort keys %{$raw{$spp}{$chromosome}}){
       $raw{$spp}{$chromosome}{$start_pos}{'prev'} = $prev;
@@ -64,7 +65,7 @@ foreach my $spp (sort keys %raw){
       $l2fc = $raw{$spp}{$chromosome}{$start_pos}{'l2fc'};
       $svalue_1 = $raw{$spp}{$chromosome}{$start_pos}{'svalue_1'};
       $svalue_2 = $raw{$spp}{$chromosome}{$start_pos}{'svalue_2'};
-      print "$spp\t$chromosome\t$start_pos\t$l2fc\t$svalue_1\n";
+      print "\t\t$spp\t$chromosome\t$start_pos\t$l2fc\t$svalue_1\n";
       # check whether to initiate cluster
       if ( ( ($l2fc  > 0) && ($l2fc > $minlog2fc) ) || \\
            ( ($l2fc  < 0) && ($l2fc  < -$minlog2fc) ) &&
@@ -73,21 +74,21 @@ foreach my $spp (sort keys %raw){
         $gapflag = 0;
         # if you find an initial cluster, roll back to see if previous ones can be included
         while ($gapflag <= $gaps_allowed) {
-          print "prev: $prev\n";
+          print "\t\t\tprev: $prev\n";
           $l2fc = $raw{$spp}{$chromosome}{$prev}{'l2fc'};
           $svalue_1 = $raw{$spp}{$chromosome}{$prev}{'svalue_1'};
           $svalue_2 = $raw{$spp}{$chromosome}{$prev}{'svalue_2'};
           $prev = $raw{$spp}{$chromosome}{$prev}{'prev'};
-          print "prev values: $l2fc\t$svalue_1\tnext previous start: $prev\n";
+          print "\t\t\tprev values: $l2fc\t$svalue_1\tnext previous start: $prev\n";
           if ( ($svalue_1 < $maxsvalueEXTN)  && ( ( ($l2fc  > 0) && ($l2fc > $minlog2fcEXTN) ) || \\
           ( ($l2fc  < 0) && ($l2fc  < -$minlog2fcEXTN) ) ) ) {
-            if ($l2fc  > 0) {print "greater than 0\n";}
-            if ($l2fc > $minlog2fcEXTN)  {print "greater then min log2fc for extn $minlog2fcEXTN)\n";}
-            if ($l2fc  < 0) {print "less than 0\n";}
-            if ($l2fc  < -$minlog2fcEXTN) {print "less than negative min log2fc for extn -$minlog2fcEXTN\n";}
-            if ($svalue_1 < $maxsvalueEXTN) {print "svalue $svalue_1 is less than the max for extn $maxsvalueEXTN\n";}
-            print "extended $l2fc\t$svalue_1\n";
-            print "svalue is $svalue_1, max svalue for extension is $maxsvalueEXTN\n";
+            if ($l2fc  > 0) {print "\t\t\t\t\tgreater than 0\n";}
+            if ($l2fc > $minlog2fcEXTN)  {print "\t\t\t\tgreater then min log2fc for extn $minlog2fcEXTN)\n";}
+            if ($l2fc  < 0) {print "\t\t\t\t\tless than 0\n";}
+            if ($l2fc  < -$minlog2fcEXTN) {print "\t\t\t\t\tless than negative min log2fc for extn -$minlog2fcEXTN\n";}
+            if ($svalue_1 < $maxsvalueEXTN) {print "\t\t\t\t\tsvalue $svalue_1 is less than the max for extn $maxsvalueEXTN\n";}
+            print "\t\t\t\textended $l2fc\t$svalue_1\n";
+            print "\t\t\t\tsvalue is $svalue_1, max svalue for extension is $maxsvalueEXTN\n";
             exit;
             $raw{$spp}{$chromosome}{$prev}{'ext'} = 1;
           }
@@ -98,7 +99,7 @@ foreach my $spp (sort keys %raw){
             $svalue_1 = $raw{$spp}{$chromosome}{$prev}{'svalue_1'};
             $svalue_2 = $raw{$spp}{$chromosome}{$prev}{'svalue_2'};
             $prev = $raw{$spp}{$chromosome}{$prev}{'prev'};
-            print "fell below threshold, gapflag = $gapflag\n";
+            print "\t\t\tfell below threshold, gapflag = $gapflag\n";
           }
         }
         # forward through sequences for extending clusters
