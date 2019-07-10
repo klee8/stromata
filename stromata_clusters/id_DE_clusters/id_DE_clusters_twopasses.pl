@@ -154,6 +154,7 @@ foreach my $spp (sort keys %raw){
               undef $cluster{$start_pos};
               print "\n\n#trimming\t$start_pos\n\n";
             }
+            else {last;}
           }
 
         # if there is a gene that meets the 'intiate cluster thresholds'
