@@ -10,6 +10,7 @@ use strict;
 
 my $file = $ARGV[0] || "sub_core_gene_set_STR_PS_ann.txt";
 open(IN, "<$file") || die "ERROR: couldn't open file: $!";
+my $orthofile = $ARGV[1] || die "ERROR: couldn't open ortholog file: $!\n";
 
 my $minlog2fc = 1;
 my $maxsvalue = 0.005;
@@ -232,3 +233,6 @@ foreach my $spp (sort keys %raw){
     }
   }
 }
+
+
+#
