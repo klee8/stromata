@@ -52,9 +52,7 @@ my $prev;
 print "calculating gene characteristics...\n";
 # first pass to calculate characteristics of genes (cluster/extension thresholds; distances to next gene etc.)
 foreach my $spp (sort keys %raw){
-#  print "species: $spp\n";
   foreach my $contig (sort keys %{$raw{$spp}}){
-#    print "\tchromosome: $contig\n";                     #### ;)
     my $prev = 0; my $svalue_1; my $svalue_2;
     foreach my $start_pos (sort { $a <=> $b } keys %{$raw{$spp}{$contig}}){
       $raw{$spp}{$contig}{$start_pos}{'prev'} = $prev;
@@ -88,36 +86,36 @@ foreach my $spp (sort keys %raw){
 
       # reset for next gene
       $prev = $start_pos;
-
-      #print "$gene_id\t$l2fc\t$svalue_1\t$raw{$spp}{$contig}{$start_pos}{'clust'}\n";
-      #print "$gene_id\t$raw{$spp}{$contig}{$start_pos}{'clust'}\n";
     }
   }
 }
 
 
 my $clustsign = 10;   # used as a cluster flag and to track cluster sign
-my %cluster;
+my %check_cluster;
 my $initiate = 0;
 my $clust_flag = 0;
 my $clusternumber = 1;
+my $cluster_end;
 my $gapflag = 0;
 my %all_clusters;
 my $clust_contig;
 my $clust_start;
-my $last_clust_end = 0;
+my $prev_cluster_end;
 my $gene_dist = 0;
 my $larger_gap_needed;
+my $trimmed = 0;
 
 open(CLUST, ">clusters.txt") || die "ERROR: couldn't open clusters.txt outfile: $!";
-print CLUST "cluster\tcontig\tstart\tend\tdist\tgene_dist\tgenes\n";
+print CLUST "species\tcluster\tcontig\tstart\tend\tdist_to_last_cluster\tgenes_between_clusters\tgenes\tend_of_contig\n";
 print "identifying clusters...\n";
 
 # identify initial genes in clusters
 foreach my $spp (sort keys %raw){
+  $clusternumber = 1;
   foreach my $contig (sort keys %{$raw{$spp}}){
     print "\n########### $contig\n";
-    my $prev = 0; $gapflag = 0; $last_clust_end = 0; $gene_dist = 0;
+    my $prev = 0; $gapflag = 0; $gene_dist = 0; $prev_cluster_end = 0;
     foreach my $start_pos (sort { $a <=> $b } keys %{$raw{$spp}{$contig}}){
       print "$start_pos\t";
       # check for gaps
@@ -129,11 +127,9 @@ foreach my $spp (sort keys %raw){
         $initiate = 1;
       }
 
-      # check if the contig has changed
-      #if ($contig ne $clust_contig) { print "changed contig mid-cluster\n"; }
-
       # temp test print checks
       print "$raw{$spp}{$contig}{$start_pos}{'gene_id'}\t$raw{$spp}{$contig}{$start_pos}{'clust'}\t";
+      print "$start_pos\t$raw{$spp}{$contig}{$start_pos}{'end'}\tgene_dist: $gene_dist\t";
       print "posDE: $raw{$spp}{$contig}{$start_pos}{'posDE'}\tclustsign: $clustsign\tgap: $gapflag\t";
       print "dist: $raw{$spp}{$contig}{$start_pos}{'distprev'}\tdthresh: $distthresh\tcontig: $contig\tclust_contig: $clust_contig\t";
 
@@ -146,50 +142,67 @@ foreach my $spp (sort keys %raw){
       {
         print "evaluate cluster...";
 
+
         # TRIM TRAILING GAPS
-          foreach my $start_pos (sort { $b <=> $a } keys %cluster )
+        foreach my $clust_gene_start (sort { $b <=> $a } keys %check_cluster )
+        {
+          if ($raw{$spp}{$clust_contig}{$clust_gene_start}{'clust'} == 0)
           {
-            if ($raw{$spp}{$clust_contig}{$start_pos}{'clust'} == 0)
-            {
-              undef $cluster{$start_pos};
-              print "\n\n#trimming\t$start_pos\n\n";
-            }
-            else {last;}
+            $trimmed++;
+            my $prev_start = $raw{$spp}{$clust_contig}{$clust_gene_start}{'prev'};
+            $cluster_end = $raw{$spp}{$clust_contig}{$prev_start}{'end'};
+#             print "\nTRIMMING: previous start = $prev_start\tcluster end = $cluster_end\tprevious cluster end = $prev_cluster_end\n";
+            delete $check_cluster{$clust_gene_start};
           }
+          else
+          {
+              $cluster_end = $raw{$spp}{$clust_contig}{$clust_gene_start}{'end'};
+              last;
+          }
+        }
 
         # if there is a gene that meets the 'intiate cluster thresholds'
         # and there are enough genes for a cluster
-        if ( ($initiate == 1) && ($mingenenum <= keys %cluster) )
+        if ( ($initiate == 1) && ($mingenenum <= keys %check_cluster) )
         {
-          print "\n$clusternumber:\t";
-          foreach my $start_pos (sort { $a <=> $b } keys %cluster )
+          # remove cluster genes from gene-distance calculation
+          $gene_dist = $gene_dist - (keys %check_cluster) - 1 - $trimmed;
+          print "\n$spp\t$clusternumber:\t";
+          foreach my $start_pos (sort { $a <=> $b } keys %check_cluster )
           {
             push(@{$all_clusters{$spp}{$clusternumber}{'all_starts'}}, $start_pos);
             push(@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}, $raw{$spp}{$clust_contig}{$start_pos}{'gene_id'});
-            $all_clusters{$spp}{$clusternumber}{'clust_dist'} = $clust_start - $last_clust_end;
-            $all_clusters{$spp}{$clusternumber}{'gene_dist'} = $gene_dist;
-            $all_clusters{$spp}{$clusternumber}{'contig'} = $clust_contig;
           }
+          $all_clusters{$spp}{$clusternumber}{'clust_dist'} = $clust_start - $prev_cluster_end;
+          print "calculating cluster distance $clust_start - $prev_cluster_end =  $all_clusters{$spp}{$clusternumber}{'clust_dist'}\n";
+          $all_clusters{$spp}{$clusternumber}{'gene_dist'} = $gene_dist;
+          $all_clusters{$spp}{$clusternumber}{'contig'} = $clust_contig;
+          $all_clusters{$spp}{$clusternumber}{'end'} = $cluster_end;
+          $prev_cluster_end = $cluster_end;
 
-          print CLUST "$clusternumber\t";
-          print CLUST "$clust_contig\t";
-          print CLUST "$clust_start\t";
-          print CLUST "$raw{$spp}{$clust_contig}{$start_pos}{'end'}\t";
-          print CLUST "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t";
-          print CLUST "$gene_dist\t";
-          print CLUST "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\n";
+
+          print CLUST "$spp\t$clusternumber\t$clust_contig\t$clust_start\t$cluster_end\t";
+          print CLUST "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t$gene_dist\t";
+          print CLUST "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\t";
+          if ($contig ne $clust_contig) { print CLUST "TRUE";}
+          else { print CLUST "FALSE";}
+          print CLUST "\n";
+
+          print "$spp\t$clusternumber\t$clust_contig\t$clust_start\t$cluster_end\t";
+          print "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t$gene_dist\t";
           print "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\n";
           $clusternumber++;
+          $gene_dist = 0;
         }
-        # reset for next cluster
+
+        # reset for next cluster or potential cluster
         $clustsign = 10;
-        undef %cluster;
+        undef %check_cluster;
         undef $clust_start;
         $initiate = 0;
         $clust_flag = 0;
         $gapflag = 0;
-        $gene_dist = 0;
-        $last_clust_end = $raw{$spp}{$clust_contig}{$start_pos}{'end'};
+        $trimmed = 0;
       }
       # note (continue to evaluate from the same position in case there are more than
       # one cluster beside one another - e.g. if the direction of DE changes)
@@ -200,7 +213,7 @@ foreach my $spp (sort keys %raw){
       {
         print "initiating cluster...";
         $clust_flag = 1;
-        $cluster{$start_pos} = $raw{$spp}{$contig}{$start_pos}{'clust'};
+        $check_cluster{$start_pos} = $raw{$spp}{$contig}{$start_pos}{'clust'};
         $clustsign = $raw{$spp}{$contig}{$start_pos}{'posDE'};
         $clust_start = $start_pos;
         $clust_contig = $contig;
@@ -209,12 +222,12 @@ foreach my $spp (sort keys %raw){
       elsif ( ($clustsign == 0) || ($clustsign == 1) && ($gapflag <= $gaps_allowed) && ($raw{$spp}{$contig}{$start_pos}{'distprev'} < $distthresh) && ($clustsign == $raw{$spp}{$contig}{$start_pos}{'posDE'}) )
       {
         print "extending cluster...";
-        $cluster{$start_pos} = $raw{$spp}{$contig}{$start_pos}{'clust'};
+        $check_cluster{$start_pos} = $raw{$spp}{$contig}{$start_pos}{'clust'};
       }
 
       # reset for next gene
       $prev = $start_pos;
-      unless ( ($clust_flag == 1) || ($prev == 0) ) {$gene_dist++;}
+      $gene_dist++;
       print "\n";
     }
   }
