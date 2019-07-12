@@ -186,7 +186,7 @@ foreach my $spp (sort keys %raw){
             # assign clusternumbers to orthologs
             my $orthogroup = $raw{$spp}{$clust_contig}{$start_pos}{'orthogroup'};
             $orthogroups{$orthogroup}{$spp} = $clusternumber;
-            $orthogroup{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
+            $orthogroups{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
             print "orthogroup:$orthogroup;cluster:$clusternumber\t";
           }
           $all_clusters{$spp}{$clusternumber}{'clust_dist'} = $clust_start - $prev_cluster_end;
@@ -290,14 +290,14 @@ foreach my $orthogroup (sort {$a <=> $b} keys %orthogroups) {
     }
   }
   $output{$group}{'max_cluster_size'} = $max_cluster_size;
-  $output{$group}{'max_cluster_species'} = $max_cluster_species;
+  $output{$group}{'max_cluster_species'} = $max_clust_spp;
 
   # check all other orthologs in cluster how they match other spp
   foreach my $species (sort {$a <=> $b} keys %{$orthogroups{$orthogroup}}) {
 
     my $current_cluster = $orthogroups{$orthogroup}{$species};
 
-    foreach my $ortholog (sort {$a <=> $b} keys %{$orthogroup{'cluster'}{$spp}{$current_cluster}}) {
+    foreach my $ortholog (sort {$a <=> $b} keys %{$orthogroups{'cluster'}{$species}{$current_cluster}}) {
 
 
       # if the number of species represented by an ortholog is > 1
@@ -309,4 +309,4 @@ foreach my $orthogroup (sort {$a <=> $b} keys %orthogroups) {
   }
   print "\n";
 }
-          $orthogroup{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
+#          $orthogroups{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
