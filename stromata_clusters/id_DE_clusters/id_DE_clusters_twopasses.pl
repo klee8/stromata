@@ -10,7 +10,6 @@ use strict;
 
 my $file = $ARGV[0] || "sub_core_gene_set_STR_PS_ann.txt";
 open(IN, "<$file") || die "ERROR: couldn't open file: $!";
-my $orthofile = $ARGV[1] || die "ERROR: couldn't open ortholog file: $!\n";
 
 my $minlog2fc = 1;
 my $maxsvalue = 0.005;
@@ -33,6 +32,7 @@ while(<IN>) {
   }
   else {
     my ($contig, $start, $end, $gene_id, $orthogroup, $l2fc, $l2fcSE, $svalue_1, $svalue_2, $spp) = split("\t", $_);
+    if ($l2fc eq "NA") { next;}
     $raw{$spp}{$contig}{$start}{'end'} = $end;
     $raw{$spp}{$contig}{$start}{'gene_id'} = $gene_id;
     $raw{$spp}{$contig}{$start}{'orthogroup'} = $orthogroup;
@@ -41,6 +41,7 @@ while(<IN>) {
     $raw{$spp}{$contig}{$start}{'svalue_1'} = $svalue_1;
     $raw{$spp}{$contig}{$start}{'svalue_2'} = $svalue_2;
     #print "spp: $spp\tsvalue_2: $svalue_2\tgene_id:$raw{$spp}{$contig}{$start}{'gene_id'}\n";                #:)
+
   }
 }
 
@@ -95,7 +96,6 @@ foreach my $spp (sort keys %raw){
 my $clustsign = 10;   # used as a cluster flag and to track cluster sign
 my %check_cluster;
 my $initiate = 0;
-my $clust_flag = 0;
 my $clusternumber = 1;
 my $cluster_end;
 my $gapflag = 0;
@@ -104,21 +104,23 @@ my $clust_contig;
 my $clust_start;
 my $prev_cluster_end;
 my $gene_dist = 0;
-my $larger_gap_needed;
 my $trimmed = 0;
+my %orthogroups;
+my $same_contig = 1;
 
 open(CLUST, ">clusters.txt") || die "ERROR: couldn't open clusters.txt outfile: $!";
 print CLUST "species\tcluster\tcontig\tstart\tend\tdist_to_last_cluster\tgenes_between_clusters\tgenes\tend_of_contig\n";
-print "identifying clusters...\n";
+print "# identifying clusters...\n";
+print "contig\tgene_id\tgene_start\gene_end\tcluster_eval\tDE_direction\t";
+print "cluster_sign\tgapflag\tbp_dist_to_next_cluster\tdistance_threshold\tgene_count_to_next_cluster\tcluster_contig\n";
 
 # identify initial genes in clusters
 foreach my $spp (sort keys %raw){
   $clusternumber = 1;
   foreach my $contig (sort keys %{$raw{$spp}}){
-    print "\n########### $contig\n";
-    my $prev = 0; $gapflag = 0; $gene_dist = 0; $prev_cluster_end = 0;
+    my $prev = 0; $gapflag = 0;  $prev_cluster_end = 0; unless ($clustsign != 10 ) {$gene_dist = 0;}
     foreach my $start_pos (sort { $a <=> $b } keys %{$raw{$spp}{$contig}}){
-      print "$start_pos\t";
+
       # check for gaps
       if ( ($clustsign != 10 ) && ($raw{$spp}{$contig}{$start_pos}{'clust'} == 0) ) { $gapflag++;}
 
@@ -129,10 +131,12 @@ foreach my $spp (sort keys %raw){
       }
 
       # temp test print checks
-      print "$raw{$spp}{$contig}{$start_pos}{'gene_id'}\t$raw{$spp}{$contig}{$start_pos}{'clust'}\t";
-      print "$start_pos\t$raw{$spp}{$contig}{$start_pos}{'end'}\tgene_dist: $gene_dist\t";
-      print "posDE: $raw{$spp}{$contig}{$start_pos}{'posDE'}\tclustsign: $clustsign\tgap: $gapflag\t";
-      print "dist: $raw{$spp}{$contig}{$start_pos}{'distprev'}\tdthresh: $distthresh\tcontig: $contig\tclust_contig: $clust_contig\t";
+      unless ($start_pos == 0) {
+        print "$contig\t$raw{$spp}{$contig}{$start_pos}{'gene_id'}\t";
+        print "$start_pos\t$raw{$spp}{$contig}{$start_pos}{'end'}\t";
+        print "$raw{$spp}{$contig}{$start_pos}{'clust'}\t$raw{$spp}{$contig}{$start_pos}{'posDE'}\t$clustsign\t$gapflag\t";
+        print "$raw{$spp}{$contig}{$start_pos}{'distprev'}\t$distthresh\t$gene_dist\t$clust_contig\t";
+      }
 
       # if you are in a cluster and pass more gaps than are allowed or
       # the distance to previous gene is larger than the thresholds
@@ -147,6 +151,7 @@ foreach my $spp (sort keys %raw){
         # TRIM TRAILING GAPS
         foreach my $clust_gene_start (sort { $b <=> $a } keys %check_cluster )
         {
+          # if the last gene of a cluster is a 'gap'
           if ($raw{$spp}{$clust_contig}{$clust_gene_start}{'clust'} == 0)
           {
             $trimmed++;
@@ -167,31 +172,52 @@ foreach my $spp (sort keys %raw){
         if ( ($initiate == 1) && ($mingenenum <= keys %check_cluster) )
         {
           # remove cluster genes from gene-distance calculation
-          $gene_dist = $gene_dist - (keys %check_cluster) - 1 - $trimmed;
-          print "\n$spp\t$clusternumber:\t";
+          my $cluster_size = (keys %check_cluster);
+          if ($contig = $clust_contig) { $same_contig = 1;}
+#          print "\ngene distance : $gene_dist = $gene_dist - $cluster_size - $same_contig - $trimmed\n";
+          $gene_dist = $gene_dist - $cluster_size - $same_contig - $trimmed;
+          $same_contig = 0;
+#          print "\n$spp\t$clusternumber:\t";
           foreach my $start_pos (sort { $a <=> $b } keys %check_cluster )
           {
-            push(@{$all_clusters{$spp}{$clusternumber}{'all_starts'}}, $start_pos);
             push(@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}, $raw{$spp}{$clust_contig}{$start_pos}{'gene_id'});
+            $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'} = $raw{$spp}{$clust_contig}{$start_pos}{'gene_id'};
+
+            # assign clusternumbers to orthologs
+            my $orthogroup = $raw{$spp}{$clust_contig}{$start_pos}{'orthogroup'};
+            $orthogroups{$orthogroup}{$spp} = $clusternumber;
+            $orthogroup{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
+            print "orthogroup:$orthogroup;cluster:$clusternumber\t";
           }
           $all_clusters{$spp}{$clusternumber}{'clust_dist'} = $clust_start - $prev_cluster_end;
-          print "calculating cluster distance $clust_start - $prev_cluster_end =  $all_clusters{$spp}{$clusternumber}{'clust_dist'}\n";
+#          print "calculating cluster distance $clust_start - $prev_cluster_end =  $all_clusters{$spp}{$clusternumber}{'clust_dist'}\n";
           $all_clusters{$spp}{$clusternumber}{'gene_dist'} = $gene_dist;
+#          print "\ngene distance is $gene_dist\n";
           $all_clusters{$spp}{$clusternumber}{'contig'} = $clust_contig;
           $all_clusters{$spp}{$clusternumber}{'end'} = $cluster_end;
           $prev_cluster_end = $cluster_end;
+          # cluster at start of contig
+          if ($gene_dist == 0) { $all_clusters{$spp}{$clusternumber}{'start_of_contig'} = "TRUE\t";}    #
+          else { $all_clusters{$spp}{$clusternumber}{'start_of_contig'} =  "FALSE\t";}
+          #cluster at end of contig
+          if ($contig ne $clust_contig) { $all_clusters{$spp}{$clusternumber}{'end_of_contig'} =  "TRUE";}
+          else {  $all_clusters{$spp}{$clusternumber}{'end_of_contig'} =  "FALSE";}
+          # size of cluster
+          $all_clusters{$spp}{$clusternumber}{'cluster_size'} = keys %{$all_clusters{$spp}{$clusternumber}};
 
-
+          # species, cluster number and position info
           print CLUST "$spp\t$clusternumber\t$clust_contig\t$clust_start\t$cluster_end\t";
+          # distance to previous cluster (bn and number of genes between them)
           print CLUST "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t$gene_dist\t";
           print CLUST "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\t";
-          if ($contig ne $clust_contig) { print CLUST "TRUE";}
-          else { print CLUST "FALSE";}
+          # cluster at begining or end of contig
+          print CLUST "$all_clusters{$spp}{$clusternumber}{'start_of_contig'}\t$all_clusters{$spp}{$clusternumber}{'end_of_contig'}";
           print CLUST "\n";
 
-          print "$spp\t$clusternumber\t$clust_contig\t$clust_start\t$cluster_end\t";
-          print "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t$gene_dist\t";
-          print "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\n";
+          print "CLUSTER!!!!";
+          #print "\n\n###\t$spp\t$clusternumber\t$clust_contig\t$clust_start\t$cluster_end\t";
+          #print "$all_clusters{$spp}{$clusternumber}{'clust_dist'}\t$gene_dist\t";
+          #print "@{$all_clusters{$spp}{$clusternumber}{'all_gene_ids'}}\n\n";
           $clusternumber++;
           $gene_dist = 0;
         }
@@ -201,7 +227,6 @@ foreach my $spp (sort keys %raw){
         undef %check_cluster;
         undef $clust_start;
         $initiate = 0;
-        $clust_flag = 0;
         $gapflag = 0;
         $trimmed = 0;
       }
@@ -213,7 +238,6 @@ foreach my $spp (sort keys %raw){
       if ( ($clustsign == 10) && ($raw{$spp}{$contig}{$start_pos}{'clust'} > 0) )
       {
         print "initiating cluster...";
-        $clust_flag = 1;
         $check_cluster{$start_pos} = $raw{$spp}{$contig}{$start_pos}{'clust'};
         $clustsign = $raw{$spp}{$contig}{$start_pos}{'posDE'};
         $clust_start = $start_pos;
@@ -229,10 +253,60 @@ foreach my $spp (sort keys %raw){
       # reset for next gene
       $prev = $start_pos;
       $gene_dist++;
-      print "\n";
+      unless ($start_pos == 0) { print "\n"; }
     }
   }
 }
 
+##################################################################################################
+########## first pass of orthologs
+#   $orthogroups{$orthogroup}{$spp} = $clusternumber;          <<<<<<<<<<<<<<<<<<<<<<<<<<<<< orthogroup filled if cluster requirements fulfilled
+#   $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'} = $raw{$spp}{$contig}{$start_pos}{'gene_id'};
+#   foreach my $orthogroup (sort $a <=> $b keys %{$orthogroups{$orthogroups}}){
+my %output;
+my $orthocluster;
+my $group = 1;
 
-#
+
+
+foreach my $orthogroup (sort {$a <=> $b} keys %orthogroups) {
+
+  # check the number of species represented
+  my $ortho_size = keys %{$orthogroups{$orthogroup}};
+  $output{$group}{'num_species'} = $ortho_size;
+  print "$orthogroup\t#species:$ortho_size\t";
+
+  # check the maximum size of the culster for the orthogroup in all species
+  my $max_cluster_size = 0;
+  my $max_clust_spp = "";
+  foreach my $species (sort {$a <=> $b} keys %{$orthogroups{$orthogroup}}) {
+    my $clusternumber = $orthogroups{$orthogroup}{$species};
+    my $cluster_size = keys %{$all_clusters{$species}{$clusternumber}{'gene_start'}};
+    $output{$group}{'species'}{$species} = $cluster_size;
+    print "$species:$cluster_size; ";
+    if ($cluster_size > $max_cluster_size) {
+      $max_cluster_size = $cluster_size;
+      $max_clust_spp = $species;
+    }
+  }
+  $output{$group}{'max_cluster_size'} = $max_cluster_size;
+  $output{$group}{'max_cluster_species'} = $max_cluster_species;
+
+  # check all other orthologs in cluster how they match other spp
+  foreach my $species (sort {$a <=> $b} keys %{$orthogroups{$orthogroup}}) {
+
+    my $current_cluster = $orthogroups{$orthogroup}{$species};
+
+    foreach my $ortholog (sort {$a <=> $b} keys %{$orthogroup{'cluster'}{$spp}{$current_cluster}}) {
+
+
+      # if the number of species represented by an ortholog is > 1
+      # get orthologs of each gene in the max cluster and check they are in the same cluster in other spp
+
+
+    }
+
+  }
+  print "\n";
+}
+          $orthogroup{'cluster'}{$spp}{$clusternumber}{$orthogroup} = $all_clusters{$spp}{$clusternumber}{'gene_start'}{$start_pos}{'gene_id'};
