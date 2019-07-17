@@ -7,11 +7,11 @@
 Identify clusters of differentially expressed genes that are shared between species.
 
 ### INPUT:
-Input has columns for each gene in analysis (reformatted using reformat_core_gene_set.Rmd):\n
+Input has columns for each gene in analysis (reformatted using reformat_core_gene_set.Rmd):  
 "contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species"
 
 ### USAGE:
-perl id_DE_clusters.pl <reformated_core_gene_set_file* * log.txt
+perl id_DE_clusters.pl <reformated_core_gene_set_file> > log.txt
 
 ### WORKFLOW
 * Iterates by contig and gene postion through differential expression output from core gene DE analysis (rows for each gene on each species). 
