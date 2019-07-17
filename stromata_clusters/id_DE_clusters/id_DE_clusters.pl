@@ -106,7 +106,7 @@ my %orthogroups;
 my $same_contig = 1;
 
 open(CLUST, ">clusters.txt") || die "ERROR: couldn't open clusters.txt outfile: $!";
-print CLUST "species\tcluster\tcontig\tstart\tend\tdist_to_last_cluster\tgenes_between_clusters\tgenes\tend_of_contig\n";
+print CLUST "species\tcluster\tcontig\tstart\tend\tdist_to_last_cluster\tgenes_between_clusters\tgenes\tstart_of_contig\tend_of_contig\n";
 #print "# identifying clusters...\n";
 #print "contig\tgene_id\tgene_start\gene_end\tcluster_eval\tDE_direction\t";
 #print "cluster_sign\tgapflag\tbp_dist_to_next_cluster\tdistance_threshold\tgene_count_to_next_cluster\tcluster_contig\n";
@@ -258,7 +258,8 @@ foreach my $spp (sort keys %raw){
 }
 
 ##################################################################################################
-##########  CHECK FOR OVERLAPPING CLUSTERS or CLUSTER PARTS
+##########          CHECK FOR OVERLAPPING CLUSTERS and collapse into $out_groups          ########
+##################################################################################################
 
 my %out_groups;
 my %check;
@@ -273,7 +274,7 @@ foreach my $species (sort {$a <=> $b} keys %all_clusters) {
 
     # FIRST PASS - check orthologs in original cluster
     foreach my $orth (@{$all_clusters{$species}{$clusternumber}{'all_orth_ids'}}) {
-      print "$orth\t";
+      print "$orth,";
       $out_groups{$group}{$species}{$clusternumber}{$orth} = 1;
       foreach my $spp (sort {$a <=> $b} keys %all_clusters) {
         unless ($spp eq $species) {
@@ -287,7 +288,7 @@ foreach my $species (sort {$a <=> $b} keys %all_clusters) {
     }
     foreach my $spp (sort keys %{$check{$group}{'PASS1'}}){
       foreach my $cluster (sort keys %{$check{$group}{'PASS1'}{$spp}}){
-        print "$spp:$cluster\t";
+        print "\t$spp:$cluster\t";
       }
     }
     print "\n";
@@ -295,18 +296,18 @@ foreach my $species (sort {$a <=> $b} keys %all_clusters) {
     # SECOND PASS
     # for any clusters found in other species in the first pass, check any orthologs not linked to the first cluster
     # identify any new clusters linked
-    foreach my $spp (sort {$a <=> $b} keys %{$out_groups{$group}}) {
-      foreach my $clust (sort keys %{$check{$group}{'PASS1'}{$spp}}){
+    foreach my $spp (sort {$a <=> $b} keys %{$check{$group}{'PASS1'}}) {
+      foreach my $clust (sort keys %{$check{$group}{'PASS1'}{$spp}}) {
         print "PASS_2\t$spp\tcluster:$clust\textra_orthologs:";
         foreach my $orth (@{$all_clusters{$spp}{$clust}{'all_orth_ids'}}) {
           unless (exists($out_groups{$group}{$spp}{$clust}{$orth})) {
-            print "$orth\t";
+            print "$orth,";
             # check extra orthologs and if they are linked to new clusters in other species
             foreach my $checkspp (sort {$a <=> $b} keys %{$out_groups{$group}}) {
               my $clustnum = $orthogroups{$orth}{$checkspp}{'clustnum'};
               unless ( exists($check{$group}{'PASS1'}{$checkspp}{$clustnum}) ) {
                 if (exists($orthogroups{$orth}{$checkspp}{'clustnum'})) {
-                  print "***$checkspp:$clustnum***\t";
+                  print "\t***$checkspp:$clustnum***\t";
                   $out_groups{$group}{$checkspp}{$clustnum}{$orth} = 1;
                   $check{$group}{'PASS2'}{$checkspp}{$clustnum} = 1;
                 }
@@ -320,18 +321,18 @@ foreach my $species (sort {$a <=> $b} keys %all_clusters) {
 
     # THRID pass
     # on the off-chance that a cluster with no orthologs in common with the original is found, check for any other links with things
-    foreach my $spp (sort {$a <=> $b} keys %{$out_groups{$group}}) {
+    foreach my $spp (sort {$a <=> $b} keys %{$check{$group}{'PASS2'}}) {
       foreach my $clust (sort keys %{$check{$group}{'PASS2'}{$spp}}){
         print "THIRD PASS\t$spp\tcluster:$clust\textra_orthologs:";
         foreach my $orth (@{$all_clusters{$spp}{$clust}{'all_orth_ids'}}) {
           unless (exists($out_groups{$group}{$spp}{$clust}{$orth})) {
-            print "$orth\t";
+            print "$orth,";
             # check extra orthologs and if they are linked to new clusters in other species
             foreach my $checkspp (sort {$a <=> $b} keys %{$out_groups{$group}}) {
               my $clustnum = $orthogroups{$orth}{$checkspp}{'clustnum'};
               unless ( exists($check{$group}{'PASS1'}{$checkspp}{$clustnum}) || exists($check{$group}{'PASS2'}{$checkspp}{$clustnum})) {
                 if (exists($orthogroups{$orth}{$checkspp}{'clustnum'})) {
-                  print "***$checkspp:$clustnum***\t";
+                  print "\t***$checkspp:$clustnum***\t";
                   $out_groups{$group}{$checkspp}{$clustnum}{$orth} = 1;
                   $check{$group}{'PASS3'}{$checkspp}{$clustnum} = 1;
                 }
@@ -368,10 +369,63 @@ foreach my $species (sort {$a <=> $b} keys %all_clusters) {
   }
 }
 
+################################################################################
+#####             Iterate through groups and write output                  #####
+################################################################################
 
-#    # check the size of the cluster
-#    #my $cluster_size = keys %{$all_clusters{$species}{$clusternumber}{'gene_start'}};
-#    #print "species:$species\tcluster:$clusternumber\tcluster_size:$cluster_size\n";
-#
-#    # check if the cluster is at the begining or end of a contigs
-#    my $cut_cluster = $all_clusters{$species}{$clusternumber}{'start_of_contig'} || $all_clusters{$species}{$clusternumber}{'end_of_contig'};
+
+foreach my $group (sort {$a <=> $b} keys %out_groups) {
+
+  # annotate clusters with in a group
+  my $max_clust = "";
+  my $max_size = 0;
+  my $same_orths = "NA";
+  my $multi_cluster = "NA";
+  foreach my $species (sort keys %{$out_groups{$group}}){
+
+    # check the number of clusters in the group for each species
+    my $num_clusters = keys %{$out_groups{$group}{$species}};
+    if ($num_clusters > 1) { $multi_cluster = $species;}
+
+    foreach my $cluster (sort keys %{$out_groups{$group}{$species}}){
+
+      # check the size of the cluster
+      my $clust_size = keys %{$out_groups{$group}{$species}{$cluster}};
+      if ($max_size < $clust_size) {
+        $max_size = $clust_size;
+        $max_clust = $species;
+      }
+    }
+  }
+
+  # check for overlapping orthologs between species
+  foreach my $pos (sort {$a <=> $b} keys %{$all_clusters{$max_clust}{$clusternumber}{'gene_start'}}) {
+    foreach my $spp (sort keys %{$out_groups{$group}}){
+
+    }
+  }
+  foreach my $spp (sort keys %{$out_groups{$group}}){
+    foreach my $cluster (sort keys %{$out_groups{$group}{$spp}}){
+      # check if the cluster is at the begining or end of a contigs
+      if ($all_clusters{$spp}{$cluster}{'start_of_contig'} == "TRUE") {
+
+      }
+      elsif ($all_clusters{$spp}{$cluster}{'end_of_contig'} == "TRUE") {
+
+      }
+    }
+  }
+      # check if there were different orthologs in other species clusters in the group
+
+
+
+      # if there were no extra orthologs, get the largest cluster and print orths
+      # for each species
+
+
+
+      # if there were extra orthologs
+      # are genes at different ends of clusters in different species
+
+      # are genes 'replaced' in clusters in different species
+}
