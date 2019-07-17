@@ -1,14 +1,19 @@
-# id_DE_clusters.pl Kate Lee July 2019
+## Identify clusters in differentially expressed data
+
+#### Kate Lee July 2019
 
 
-## AIM:
+### AIM:
 Identify clusters of differentially expressed genes that are shared between species.
 
-## INPUT:
-Input has columns for each gene in analysis (reformatted using reformat_core_gene_set.Rmd):
+### INPUT:
+Input has columns for each gene in analysis (reformatted using reformat_core_gene_set.Rmd):\n
 "contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species"
 
-## WORKFLOW
+### USAGE:
+perl id_DE_clusters.pl <reformated_core_gene_set_file> > log.txt
+
+### WORKFLOW
 * Iterates by contig and gene postion through differential expression output from core gene DE analysis (rows for each gene on each species). 
 **  Identifies genes that could initiate or extend a cluster based on their fold change and svalues
 * Iterates through DE values a second time. 
