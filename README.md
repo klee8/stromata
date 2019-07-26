@@ -51,5 +51,5 @@ Same as above for Epichloe DE but uses the Lolium perenne gene set from Dupont e
 Same DE pipeline as above, but using the plant and culture data from Dupont et al., (2015).
 
 #### Future work
-- bwa alignment of genomes against more complete genome (David has pacbio data) to see if some segments are near enough to have genes from the same cluster
+- bwa alignment of genomes against more complete genome to see if some segments are near enough to have genes from the same cluster
 - use occultercut to identify AT rich (i.e. most likely repeat regions) to look for clusters that have been split up by repeat regions
