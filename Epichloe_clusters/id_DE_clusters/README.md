@@ -28,5 +28,6 @@ perl id_DE_clusters.pl <reformated_core_gene_set_file> > log.txt
     * For each ortholog not in original cluster, but present in other species, checks for more linked clusters
     * (On the off chance that clusters from the same species are linked across two contigs by clusters in other species, make a third pass with any unchecked orthologs).
 * Iterates through groups of clusters
-    * Order orthologs to line up with one another
-    * Write to output with added annotation to show end of contigs and gaps. 
+    * identifies shared orthologs
+    * write table of cluster groups with flat file for each species and ortholog 
+    * Write script to graphs cluster with added annotation to show end of contigs, gaps and shared orthologs. 
