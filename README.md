@@ -1,5 +1,5 @@
 ## Epichloe stromata RNA-Seq project analysis 
-#### Kate Lee, 2019 
+### Kate Lee, 2019 
 
 ### AIMS:
 - Find differentially expressed transcripts in three different treatments of three different Epichloe-host symbiotic pairs
@@ -9,7 +9,7 @@
 - Compare psudostem expression with previous studies
 
 
-#### DATA:
+### DATA:
 - Epichloe samples
     - E.typhina_E8: Epichloe typhina strain E8 (obligate stromata former), from Rikers. Causes choke on ryegrass. (454 sequencing for this strain (from Chris Shardel 2013 comparative geneome paper.)
     - E.festucae_E2368: Epichloe festucae strain E2368, created by Chris Shardel by crossing E189 X E434 and backcrossing the F1 generation to E189. Fl1 + lolium is the lab's main Epichloe-grass model.
@@ -24,8 +24,8 @@
     - (Epichloe illumina runs listed in stroma_files.csv)
 
 
-#### Overview:
-##### Epichloe DE
+### Overview:
+#### Epichloe DE
 - 0_raw_data (on SRA database, Bioproject PRJNA554133)
 - 1_QC
     - ran fastQC on all files
@@ -40,16 +40,16 @@
     - add annotations from David Winters funnanotate pipeline for Epichloe.
     - identify core genes found in more than one species
 
-##### Epichloe clusters 
+#### Epichloe clusters 
 Use DE output to identify clusters of genes that are up or down regulated. Illustrate with graphs and tabulate results.
     
     
-##### Ryegrass DE
+#### Ryegrass DE
 Same as above for Epichloe DE but uses the Lolium perenne gene set from Dupont et al., (2015).
 
-##### Plant vs culture DE
+#### Plant vs culture DE
 Same DE pipeline as above, but using the plant and culture data from Dupont et al., (2015).
 
-##### Future work
+#### Future work
 - bwa alignment of genomes against more complete genome (David has pacbio data) to see if some segments are near enough to have genes from the same cluster
 - use occultercut to identify AT rich (i.e. most likely repeat regions) to look for clusters that have been split up by repeat regions
