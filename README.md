@@ -24,7 +24,7 @@
     - (Epichloe illumina runs listed in stroma_files.csv)
 
 
-### Overview:
+### OVERVIEW:
 #### Epichloe DE
 - 0_raw_data (on SRA database, Bioproject PRJNA554133)
 - 1_QC
