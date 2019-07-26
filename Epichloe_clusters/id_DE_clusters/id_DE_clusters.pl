@@ -408,7 +408,7 @@ print GROUPS "group\tnum_spp\tspecies\tcluster\tcluster_size\tortholog\tstart\te
 
 # print out list of clusters that are present in more than one species
 foreach my $group (sort {$a <=> $b} keys %out_groups) {
-  my $species; my $cluster;
+  my $species; my $cluster; my $clust_len;
   my $clust_start;
   my $clust_end;
   my $num_spp = keys %{$out_groups{$group}};
@@ -489,6 +489,7 @@ END_LINE
         }
         $clust_start = $all_clusters{$spp}{$clust}{'clust_start'};
         $clust_end = $all_clusters{$spp}{$clust}{'clust_end'};
+        $clust_len = ($clust_end - $clust_start)/1000;
         $cluster = $clust;
       }
 
@@ -507,7 +508,7 @@ END_LINE
         #print GRAPH "                         label_angle = 0)\n";
       }
 
-      print GRAPH "\ngdd.draw(format=\'linear\', pagesize=(15*cm,4*cm), fragments=1, start=$clust_start, end=$clust_end)\n";
+      print GRAPH "\ngdd.draw(format=\'linear\', pagesize=($clust_len*cm,4*cm), fragments=1, start=$clust_start, end=$clust_end)\n";
       print GRAPH "gdd.write(\"$group.$spp.diagram.svg\", \"SVG\")";
       close GRAPH;
     }
