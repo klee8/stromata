@@ -404,6 +404,7 @@ foreach my $species (sort keys %all_clusters) {
 
 # flat file of groups with one row for each ortholog for each species
 open(GROUPS, ">cluster_groups.txt") || die "ERROR: couldn't open cluster_groups.txt: $!";
+print GROUPS "group\tnum_spp\tspecies\tcluster\tcluster_size\tortholog\tstart\tend\tstrand\n";
 
 # print out list of clusters that are present in more than one species
 foreach my $group (sort {$a <=> $b} keys %out_groups) {
@@ -455,7 +456,6 @@ END_LINE
           else { $end= "FALSE"; }
 
           # check presence of gaps in clusters
-          print GROUPS "$group\t$num_spp\t$spp\t$clust\t$clust_size\t$orth\t\n";
           my $gene_id = $orthogroups{'cluster'}{$spp}{$clust}{$orth};
           my $contig = $orthogroups{$orth}{$spp}{'contig'};
           my $start = $orthogroups{'start'}{$spp}{$clust}{$orth};
@@ -480,6 +480,7 @@ END_LINE
             $label_angle = 180;
           }
 
+          print GROUPS "$group\t$num_spp\t$spp\t$clust\t$clust_size\t$orth\t$start\t$end\t$orientation\n";
           print GRAPH "feature = SeqFeature(FeatureLocation(".$start.", ";
           print GRAPH $end."), strand=".$orientation."1)\n";
           print GRAPH "gds_features.add_feature(feature, name=\"".$orth."\", label=\"True\", color=\"".$color."\", label_size=10, label_position=\"".$label_position;
