@@ -1,0 +1,41 @@
+---
+title: "Phobius_short_output_reformatted.Rmd"
+author: "Kate Lee"
+date: "01/08/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+Phobius web server (http://phobius.sbc.su.se/) was used to identify signal peptides that may have been missed by SignalP. The short output was used. Input protein sets for each genome.
+
+Flat file of ortholog names for each gene name was also used to reformat data
+
+
+```{r get_data}
+orth <- read.delim("flat_ortho_file.txt", sep = " ", header = TRUE) 
+ely <- read.table("E.ely_phobius.txt", sep = "", skip = 4, header = FALSE)
+colnames(ely) <- c("ely_gene_id", "ely_TM", "ely_SP", "el_PREDICTION")
+typ <- read.table("E.typ_phobius.txt", sep = "", skip = 4, header = FALSE)
+colnames(typ) <- c("typ_gene_id", "typ_TM", "typ_SP", "typ_PREDICTION")
+fes <- read.table("E.fes_phobius.txt", sep = "", skip = 4, header = FALSE)
+colnames(fes) <- c("fes_gene_id", "fes_TM", "fes_SP", "fes_PREDICTION")
+```
+
+```{r re-format_data}
+
+ely <- merge(ely, orth[, c("ortho_group", "gene_id")], by.x = "ely_gene_id", by.y = "gene_id")
+typ <- merge(typ, orth[, c("ortho_group", "gene_id")], by.x = "typ_gene_id", by.y = "gene_id")
+fes <- merge(fes, orth[, c("ortho_group", "gene_id")], by.x = "fes_gene_id", by.y = "gene_id")
+
+phobius <- merge(ely, fes, by = "ortho_group", all = TRUE)
+phobius <- merge(phobius, typ, by = "ortho_group")
+phobius
+
+
+write.table(phobius, "phobius_short_results_reformatted.txt", row.names = FALSE, quote = FALSE)
+```
