@@ -54,7 +54,7 @@ inf_ps[inf_ps$overlaps == 1,]
 
 ```{r permute_data}
 set.seed(101) ## for reproducibility
-nsim <- 1000
+nsim <- 1000000
 res_up <- numeric(nsim) ## set aside space for results
 res_down <- numeric(nsim)
 for (i in 1:nsim) {
@@ -83,6 +83,10 @@ res_down <- c(res_down, obs_down)
 
 write.table(res_up, "INF_PS_randomised_upregulated.txt", quote = FALSE, row.names = FALSE)
 write.table(res_down, "NIF_PS_randomised_downregulated.txt", quote = FALSE, row.names = FALSE)
+
+
+median(res_up)
+median(res_down)
 ```
 
 
