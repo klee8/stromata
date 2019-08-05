@@ -1,0 +1,98 @@
+---
+title: "DE_permutations.Rmd"
+author: "Kate Lee"
+date: "05/08/2019"
+output: html_document
+---
+
+AIM: 
+- take total number of expressed genes and total number of significantly differentially expressed genes for each species
+- randomise the DE genes multiple times (e.g. 1 million)
+- check to see if there are overlaps of DE genes between species 
+
+Adapted from https://mac-theobio.github.io/QMEE/permutation_examples.html
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+Read in the data from the core gene set analysis (this shows a line for every ortholog described in the gene set)
+
+```{r get_data}
+
+inf_ps_rfmt <- read.delim("../core_gene_sets/core_genes_INF_PS_rfmt.txt", header = TRUE, sep = "\t")
+
+# remove lines with no fold change reading
+inf_ps <- inf_ps_rfmt[!is.na(inf_ps_rfmt$log2fc),]
+
+# remove any duplicate rows
+inf_ps <- inf_ps %>% distinct
+
+# set DE at log2FC >= 1 and svalue <= 0.005
+inf_ps <- inf_ps %>% mutate(DE = ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0))
+
+# flag direction of fold change
+inf_ps <- inf_ps %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
+
+# subset data
+inf_ps <- inf_ps[, c("species", "orthogroup", "gene_id", "dir_FC", "DE")]
+
+# total genes and total number of DE genes per species
+inf_ps %>% group_by(species) %>% summarise(total = n(), total_DE = sum(DE))
+
+# total number of ortholog overlaps in observed data
+inf_ps <- inf_ps %>% 
+          group_by(orthogroup) %>% 
+          mutate(number_spp = length(unique(species)), 
+                 overlaps = ifelse((length(unique(species)) > 1) && (sum(DE) == length(unique(species))), 1, 0))
+
+inf_ps[inf_ps$overlaps == 1,]
+#inf_ps[inf_ps$orthogroup == "og_0451",]
+```
+
+
+
+```{r permute_data}
+set.seed(101) ## for reproducibility
+nsim <- 1000
+res_up <- numeric(nsim) ## set aside space for results
+res_down <- numeric(nsim)
+for (i in 1:nsim) {
+    ## standard approach: scramble response value
+    bdat <- data.frame()
+    for (spp in unique(inf_ps_rfmt$species)) {
+      perm <- sample(nrow(inf_ps[inf_ps$species == spp,]))
+      tmp <- transform(inf_ps[inf_ps$species == spp,], DE = DE[perm])
+      bdat <- rbind(bdat, tmp)
+    }
+    ## check the number of ortholog overlaps and store them
+    res <- bdat %>% group_by(orthogroup) %>% 
+           mutate(number_spp = length(unique(species)), 
+                  overlaps = ifelse((length(unique(species)) > 1) && (sum(DE) == length(unique(species))), 1, 0))
+    res_up[i] <- nrow(filter(res, (overlaps == 1) & (dir_FC == "+")))
+    res_down[i] <- nrow(filter(res, (overlaps == 1) & (dir_FC == "-")))
+}
+
+# observed results
+obs_up <- nrow(filter(inf_ps, (overlaps == 1) & (dir_FC == "+")))
+obs_down <- nrow(filter(inf_ps, (overlaps == 1) & (dir_FC == "-")))
+
+## append the observed value to the list of results
+res_up <- c(res_up, obs_up)
+res_down <- c(res_down, obs_down)
+
+write.table(res_up, "INF_PS_randomised_upregulated.txt", quote = FALSE, row.names = FALSE)
+write.table(res_down, "NIF_PS_randomised_downregulated.txt", quote = FALSE, row.names = FALSE)
+```
+
+
+```{r graph_permutations}
+
+par(mfrow = c(2,1))
+
+hist(res_up,col="gray",las=1,main="")
+abline(v=obs_up,col="red")
+
+hist(res_down,col="gray",las=1,main="")
+abline(v=obs_down,col="red")
+```
