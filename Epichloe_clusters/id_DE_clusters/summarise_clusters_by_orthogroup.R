@@ -97,7 +97,7 @@ keep <- c("ortho_group", "el_cluster", "el_cluster_size", "el_gene_id", "el_star
 str_inf_groups <- str_inf_groups[, keep]
 inf_ps_groups <- str_inf_groups[, keep]
 
-write.table(str_ps_groups, "str_ps_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
-write.table(str_inf_groups, "str_inf_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
-write.table(inf_ps_groups, "inf_ps_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
+write.table(str_ps_groups, "STR_PS/str_ps_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
+write.table(str_inf_groups, "STR_INF/str_inf_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
+write.table(inf_ps_groups, "INF_PS/inf_ps_groups_wide_file_for_ann.txt", quote = FALSE, row.names = FALSE)
 
