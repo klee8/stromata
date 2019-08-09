@@ -9,7 +9,7 @@
 use strict;
 
 my $file = $ARGV[0] || "sub_core_gene_set_STR_PS_ann.txt";
-open(IN, "<$file") || die "ERROR: couldn't open file: $!";
+open(IN, "<$file") || die "ERROR: couldn't open file $file: $!";
 
 my $minlog2fc = 2;
 my $maxsvalue = 0.005;
@@ -37,7 +37,7 @@ while(<IN>) {
   }
   else {
     my ($contig, $start, $end, $strand, $gene_id, $orthogroup, $l2fc, $l2fcSE, $svalue_1, $svalue_2, $spp) = split("\t", $_);
-    if ($l2fc eq "NA") { next;}
+    #if ($l2fc eq "NA") { next;}
     $raw{$spp}{$contig}{$start}{'end'} = $end;
     $raw{$spp}{$contig}{$start}{'strand'} = $strand;
     $raw{$spp}{$contig}{$start}{'gene_id'} = $gene_id;
@@ -65,8 +65,11 @@ foreach my $spp (sort keys %raw){
       my $svalue_1 = $raw{$spp}{$contig}{$start_pos}{'svalue_1'};
       my $svalue_2 = $raw{$spp}{$contig}{$start_pos}{'svalue_2'};
 
+      # check for missing data
+      if (($l2fc eq 'NA') || ($l2fc eq '')) {$raw{$spp}{$contig}{$start_pos}{'clust'} = 0;}
+
       # check whether to initiate cluster
-      if ( ($svalue_1 < $maxsvalue) && ( ( ($l2fc  > 0) && ($l2fc > $minlog2fc) ) || ( ($l2fc  < 0) && ($l2fc  < -$minlog2fc) ) ) )
+      elsif ( ($svalue_1 < $maxsvalue) && ( ( ($l2fc  > 0) && ($l2fc > $minlog2fc) ) || ( ($l2fc  < 0) && ($l2fc  < -$minlog2fc) ) ) )
       {
         $raw{$spp}{$contig}{$start_pos}{'clust'} = 2;
       }
@@ -125,7 +128,7 @@ foreach my $spp (sort keys %raw){
     foreach my $start_pos (sort { $a <=> $b } keys %{$raw{$spp}{$contig}}){
 
       # check for gaps
-      if ( ($clustsign != 10 ) && ($raw{$spp}{$contig}{$start_pos}{'clust'} == 0) ) { $gapflag++;}
+      if ( ($clustsign != 10 ) &&  ($raw{$spp}{$contig}{$start_pos}{'clust'} == 0) ) { $gapflag++;}
 
       # flag genes that coud initiate a cluster
       if ($raw{$spp}{$contig}{$start_pos}{'clust'} == 2)
@@ -149,7 +152,7 @@ foreach my $spp (sort keys %raw){
       if ( ($clustsign != 10) && ( ($gapflag > $gaps_allowed) || ($raw{$spp}{$contig}{$start_pos}{'distprev'} > $distthresh) || ($clustsign != $raw{$spp}{$contig}{$start_pos}{'posDE'}) || ($contig ne $clust_contig) ) )
       {
         print LOG "evaluate cluster...\n";
-
+        if ($raw{$spp}{$contig}{$start_pos}{'clust'} == 0) { $gapflag = $gapflag - 1;}
 
         # TRIM TRAILING GAPS
         foreach my $clust_gene_start (sort { $b <=> $a } keys %check_cluster )
@@ -160,21 +163,25 @@ foreach my $spp (sort keys %raw){
             $trimmed++;
             my $prev_start = $raw{$spp}{$clust_contig}{$clust_gene_start}{'prev'};
             $cluster_end = $raw{$spp}{$clust_contig}{$prev_start}{'end'};
-             print LOG "\nTRIMMING: previous start = $prev_start\tcluster end = $cluster_end\tprevious cluster end = $prev_cluster_end\n";
-             delete $check_cluster{$clust_gene_start};
+            print LOG "\nTRIMMING: previous start = $prev_start\tcluster end = $cluster_end\tprevious cluster end = $prev_cluster_end\n";
+            $gapflag = $gapflag - 1;
+            delete $check_cluster{$clust_gene_start};
           }
           else
           {
               $cluster_end = $raw{$spp}{$clust_contig}{$clust_gene_start}{'end'};
+              my $length_cluster = keys %check_cluster;
+              print LOG "\ncluster size = $length_cluster, gapflag = $gapflag\n";
               last;
           }
         }
 
         # if there is a gene that meets the 'intiate cluster thresholds'
         # and there are enough genes for a cluster (i.e. minimum gene number, or less than the minimum gene number but with fewer gaps than allowed)
-        #if ( ($initiate == 1) && ( ($mingenenum <= keys %check_cluster) ||  ( ($mingenenum -1 <= keys %check_cluster) && ($gapflag <= $gaps_allowed -1) ) ) )
-        if ( ($initiate == 1) && ($mingenenum <= keys %check_cluster) )
+        if ( ($initiate == 1) && ( ($mingenenum <= keys %check_cluster)  ||  ( (($mingenenum -1) <= keys %check_cluster) && ($gapflag <= ($gaps_allowed -1) ) ) ) )
+        #if ( ($initiate == 1) && ($mingenenum <= keys %check_cluster) )
         {
+          print LOG "cluster initiated\n";
           # remove cluster genes from gene-distance calculation
           my $cluster_size = (keys %check_cluster);
           if ($contig = $clust_contig) { $same_contig = 1;}
