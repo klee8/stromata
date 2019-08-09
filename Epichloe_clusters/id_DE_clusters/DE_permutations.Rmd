@@ -94,12 +94,7 @@ write.table(results, "randomised_DE_results_.txt")
 ```
 
 ```{r check_results}
-FC4_up
-FC4_down
-FC2_up
-FC2_down
-core_up
-core_down
+
 # observed results
 FC2_obs_up <- nrow(filter(inf_ps, (FC2_overlaps == 1) & (dir_FC == "+")))
 FC2_obs_down <- nrow(filter(inf_ps, (FC2_overlaps == 1) & (dir_FC == "-")))
