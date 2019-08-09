@@ -3,8 +3,31 @@
 
 library(tidyverse)
 
+
+
+args = commandArgs(trailingOnly=TRUE)
+if (length(args)<1) {
+  stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
+} else {
+  infile = paste("../../core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "") #| "../core_gene_sets/core_genes_INF_PS_rfmt.txt"
+  outfile1 = paste(args[1], "_permute_cluster_results.txt", sep = "") #| "observed_clusters.txt"
+  outfile2 = paste(args[1], "_permuted_DE_cluster_results.txt", sep = "")   #| "permuted_data.txt"
+  graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
+  nsim = args[2] #|| 10000
+}
+
+print(infile)
+print(outfile1)
+print(outfile2)
+print(graphout)
+print(nsim)
+
+#infile <- "../core_gene_sets/core_genes_INF_PS_rfmt.txt"
+#outfile1 <- "INF_PS_observed_clusters.txt"
+#outfile2 <- "INF_PS_permuted_DE_cluster_numbers.txt"
+
 # read in reformatted data
-df <- read.delim("../core_gene_sets/core_genes_INF_PS_rfmt.txt", header = TRUE, sep = "\t")
+df <- read.delim(infile, header = TRUE, sep = "\t")
 
 # remove any duplicate rows
 df <- df %>% distinct
@@ -32,8 +55,6 @@ df$temp_dirFC <- lag(df$dir_FC)
 df$change <- mapply(changes, df$contig, df$temp_contig, df$dir_FC, df$temp_dirFC)
 df$temp_contig <- NULL
 df$temp_dirFC <- NULL
-colnames(df)
-
 
 # identify clusters in each spp by collapsing each group of gene DE results into a string 
 # assess with regex
@@ -61,32 +82,82 @@ for (group in 1:counter) {
     }
   }
 }
-
 # add orth and gene lists
 #clusters <- cbind(clusters, my_orths)
 #clusters <- cbind(clusters, my_genes)
 #colnames(clusters) <- c("group", "cluster_DE", "pos", "len", "orths", "genes")
 
-# add cluster information to main dataframe
+
 colnames(clusters) <- c("group", "cluster_DE", "pos", "len")
-clusters
-df$clust_pos <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("pos")], 0 ))
-df$clust_len <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("len")], 0 ))
-df$clust_cig <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("cluster_DE")], 0 ))
-head(df)
 
+# number of observed clusters
+obs_clusters <- nrow(clusters)
 
-temp <- sapply(df$change, function(x) ifelse( x %in% clusters$group, 
-                                              ifelse(clusters[clusters$group == x, c("pos")], 0 ))
-
-check_groups <- function(flag, groupnum, prev) {
-  if (groupnum != prev) { flag <-  1 }
-  if (groupnum %in% clusters$group) {
-    if (clusters[clusters$group == groupnum, c("pos")] )
+#####      Flag the genes that are in a cluster (and not just in a group of genes which has a cluster)
+prev <- 0
+flag <- 1
+inclust <- as.character()
+for (x in df$change) {
+  if (x != prev) { flag <-  1 }
+  if (x %in% clusters$group) {
+    start <- clusters[clusters$group == x, c("pos")]
+    end <- clusters[clusters$group == x, c("pos")] + clusters[clusters$group == x, c("len")] - 1
+    if ( (start <= flag) & (flag <= end ) ) {
+      inclust <- c(inclust, x)
+  }
+    else { inclust <- c(inclust, 0) }
   } 
-  
-  prev <- groupnum
-  return(flag, prev)
+  else { inclust <- c(inclust, 0) }
+  flag <- flag + 1
+  prev <- x
 }
 
-write.table(df, "cluster_id_in_R.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+# add cluster information to main dataframe  
+df$in_cluster <- inclust
+df$clust_pos <- sapply(df$in_cluster, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("pos")], 0 ))
+df$clust_len <- sapply(df$in_cluster, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("len")], 0 ))
+df$clust_cig <- sapply(df$in_cluster, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("cluster_DE")], 0 ))
+
+# write to file
+write.table(df, outfile1, row.names = FALSE, quote = FALSE, sep = "\t")
+
+
+# permute DE and check number of clusters found
+num_clusters <- as.numeric()
+for (i in 1:nsim) {
+  ## standard approach: scramble response value
+  bdat <- data.frame()
+  for (spp in unique(df$species)) {
+    perm <- sample(nrow(df[df$species == spp,]))
+    tmp <- transform(df[df$species == spp,], DE = DE[perm])
+    tmp <- transform(tmp, DE2 = ifelse((DE == 1) | (DE == 2), 1, 0), DE4 = ifelse((DE == 2), 1, 0))
+    bdat <- rbind(bdat, tmp)
+  }
+
+  # check number of clusters found in this permutation
+  tmp_clusters <- data.frame()
+  for (group in 1:counter) {
+    DEstring <- paste(bdat[bdat$change == group, c("DE")], collapse = "")
+    if (grepl("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE)) {
+      temp <- (gregexpr("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE))
+      for (i in temp) {
+        pos <- temp[1][[1]][1]
+        len <- (attr(temp[1][[1]], "match.length"))
+        clust <- substr(DEstring, pos, (pos + len -1))
+        if ((len > 3) || ( (len == 3) & (grepl('0', clust, perl = TRUE) == FALSE) ) ){
+          row <- c(as.numeric(group), as.numeric(clust), as.numeric(pos), as.numeric(len))
+          tmp_clusters <- rbind(tmp_clusters, row)
+        } 
+      }
+    }
+  }
+  num_clusters <- c(num_clusters, nrow(tmp_clusters))
+}
+
+write.table(num_clusters, outfile2, quote = FALSE, row.names = FALSE, sep = "\t")
+
+ggplot() +
+  geom_bar(aes(x = num_clusters)) +
+  geom_vline(xintercept = obs_clusters, color = "red", size=1) 
+
+ggsave(graphout)
