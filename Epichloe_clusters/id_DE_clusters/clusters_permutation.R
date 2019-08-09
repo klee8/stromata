@@ -3,7 +3,6 @@
 
 library(tidyverse)
 
-
 # read in reformatted data
 df <- read.delim("../core_gene_sets/core_genes_INF_PS_rfmt.txt", header = TRUE, sep = "\t")
 
@@ -31,12 +30,20 @@ counter <- 0
 df$temp_contig <- lag(df$contig)
 df$temp_dirFC <- lag(df$dir_FC)
 df$change <- mapply(changes, df$contig, df$temp_contig, df$dir_FC, df$temp_dirFC)
+df$temp_contig <- NULL
+df$temp_dirFC <- NULL
+colnames(df)
+
 
 # identify clusters in each spp by collapsing each group of gene DE results into a string 
 # assess with regex
 clusters <- data.frame()
+#my_orths <- as.character()
+#my_genes <- as.character()
 for (group in 1:counter) {
   DEstring <- paste(df[df$change == group, c("DE")], collapse = "")
+  #DEorths <- df[df$change == group, c("orthogroup")]  
+  #DEgenes <- df[df$change == group, c("gene_id")] 
   if (grepl("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE)) {
     temp <- (gregexpr("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE))
     for (i in temp) {
@@ -44,7 +51,10 @@ for (group in 1:counter) {
       len <- (attr(temp[1][[1]], "match.length"))
       clust <- substr(DEstring, pos, (pos + len -1))
       if ((len > 3) || ( (len == 3) & (grepl('0', clust, perl = TRUE) == FALSE) ) ){
-        #print(paste(group, DEstring, pos, len, sep = " "))
+        #orths <- paste(DEorths[pos:(pos +len -1)], collapse = ",")
+        #genes <- paste(DEgenes[pos:(pos +len -1)], collapse = ",")
+        #my_orths <- c(my_orths, orths)
+        #my_genes <- c(my_genes, genes)
         row <- c(as.numeric(group), as.numeric(clust), as.numeric(pos), as.numeric(len))
         clusters <- rbind(clusters, row)
       } 
@@ -52,11 +62,31 @@ for (group in 1:counter) {
   }
 }
 
+# add orth and gene lists
+#clusters <- cbind(clusters, my_orths)
+#clusters <- cbind(clusters, my_genes)
+#colnames(clusters) <- c("group", "cluster_DE", "pos", "len", "orths", "genes")
+
 # add cluster information to main dataframe
 colnames(clusters) <- c("group", "cluster_DE", "pos", "len")
+clusters
 df$clust_pos <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("pos")], 0 ))
 df$clust_len <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("len")], 0 ))
 df$clust_cig <- sapply(df$change, function(x) ifelse( x %in% clusters$group, clusters[clusters$group == x, c("cluster_DE")], 0 ))
+head(df)
 
+
+temp <- sapply(df$change, function(x) ifelse( x %in% clusters$group, 
+                                              ifelse(clusters[clusters$group == x, c("pos")], 0 ))
+
+check_groups <- function(flag, groupnum, prev) {
+  if (groupnum != prev) { flag <-  1 }
+  if (groupnum %in% clusters$group) {
+    if (clusters[clusters$group == groupnum, c("pos")] )
+  } 
+  
+  prev <- groupnum
+  return(flag, prev)
+}
 
 write.table(df, "cluster_id_in_R.txt", row.names = FALSE, quote = FALSE, sep = "\t")
