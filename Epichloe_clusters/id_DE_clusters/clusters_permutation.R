@@ -3,14 +3,13 @@
 
 library(tidyverse)
 
-
-
+  
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
   infile = paste("../../core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "") #| "../core_gene_sets/core_genes_INF_PS_rfmt.txt"
-  outfile1 = paste(args[1], "_permute_cluster_results.txt", sep = "") #| "observed_clusters.txt"
+  outfile1 = paste(args[1], "_cluster_results.txt", sep = "") #| "observed_clusters.txt"
   outfile2 = paste(args[1], "_permuted_DE_cluster_results.txt", sep = "")   #| "permuted_data.txt"
   graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
   nsim = args[2] #|| 10000
