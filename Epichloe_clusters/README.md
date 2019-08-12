@@ -1,6 +1,7 @@
 ## Identify clusters in Epichloe genomes
 
 ### AIM:
+Use different methods to identify metabolite clusters in Epichloe
 
 
 ### Methods:
