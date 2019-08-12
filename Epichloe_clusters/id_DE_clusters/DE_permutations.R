@@ -1,7 +1,7 @@
-#AIM: 
+#AIM:
 #  - take total number of expressed genes and total number of significantly differentially expressed genes for each species
 #  - randomise the DE genes multiple times (e.g. 1 million)
-#  - check to see if there are overlaps of DE genes between species 
+#  - check to see if there are overlaps of DE genes between species
 
 #Adapted from https://mac-theobio.github.io/QMEE/permutation_examples.html
 
@@ -16,10 +16,10 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
-  infile = paste("../../core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "") 
-  outfile = paste(args[1], "_permute_DE_results.txt", sep = "") 
+  infile = paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "")
+  outfile = paste(args[1], "_permute_DE_results.txt", sep = "")
   graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
-  nsim = as.numeric(args[2]) 
+  nsim = as.numeric(args[2])
 }
 print(paste("infile: ", infile))
 print(paste("outfile: ", outfile))
@@ -37,9 +37,9 @@ data <- data_rfmt[!is.na(data_rfmt$log2fc),]
 data <- data %>% distinct
 
 # set DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005
-data <- data %>% mutate(DE = ifelse((log2fc >= 2) &(svalue_1 <= 0.005), 2, 
+data <- data %>% mutate(DE = ifelse((log2fc >= 2) &(svalue_1 <= 0.005), 2,
                                         ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0)),
-                            DE2 = ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0), 
+                            DE2 = ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0),
                             DE4 = ifelse((log2fc >= 2) &(svalue_1 <= 0.005), 1, 0))
 
 # flag direction of fold change
@@ -52,19 +52,19 @@ data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE", "DE2", "DE4
 data %>% group_by(species) %>% summarise(total = n(), total_DE2 = sum(DE2), total_DE4 = sum(DE4))
 
 # total number of ortholog overlaps in observed data
-data <- data %>% 
-  group_by(orthogroup) %>% 
-  mutate(number_spp = length(unique(species)), 
-         FC2_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == length(unique(species))), 1, 0),        
-         FC4_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE4) == length(unique(species))), 1, 0), 
+data <- data %>%
+  group_by(orthogroup) %>%
+  mutate(number_spp = length(unique(species)),
+         FC2_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == length(unique(species))), 1, 0),
+         FC4_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE4) == length(unique(species))), 1, 0),
          core_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == (length(unique(species)))) & (sum(DE4) >= 1), 1, 0))
 
 
-############  PERMUTE DATA 
+############  PERMUTE DATA
 
 set.seed(101) ## for reproducibility
 ## set aside space for permutation results
-FC4_up <- numeric(nsim) 
+FC4_up <- numeric(nsim)
 FC4_down <- numeric(nsim)
 FC2_up <- numeric(nsim)
 FC2_down <- numeric(nsim)
@@ -81,12 +81,12 @@ for (i in 1:nsim) {
     tmp <- transform(tmp, DE2 = ifelse((DE == 1) | (DE == 2), 1, 0), DE4 = ifelse((DE == 2), 1, 0))
     bdat <- rbind(bdat, tmp)
   }
-  
+
   ## check the number of ortholog overlaps and store them
-  res <- bdat %>% group_by(orthogroup) %>% 
-    mutate(number_spp = length(unique(species)), 
-           FC2_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == length(unique(species))), 1, 0),        
-           FC4_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE4) == length(unique(species))), 1, 0), 
+  res <- bdat %>% group_by(orthogroup) %>%
+    mutate(number_spp = length(unique(species)),
+           FC2_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == length(unique(species))), 1, 0),
+           FC4_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE4) == length(unique(species))), 1, 0),
            core_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == (length(unique(species)))) & (sum(DE4) >= 1), 1, 0))
   FC4_up[i] <- nrow(filter(res, (FC4_overlaps == 1) & (dir_FC == "+")))
   FC4_down[i] <- nrow(filter(res, (FC4_overlaps == 1) & (dir_FC == "-")))
@@ -129,7 +129,7 @@ results <- permutations
 up_2FC <- ggplot(results) +
             facet_grid( . ~ species) +
             geom_bar(aes(x = FC2_up)) +
-            geom_vline(xintercept = FC2_obs_up, color = "red", size=1) 
+            geom_vline(xintercept = FC2_obs_up, color = "red", size=1)
 up_2FC
 down_2FC <- ggplot(results) +
               geom_bar(aes(x = FC2_down)) +
@@ -138,7 +138,7 @@ down_2FC <- ggplot(results) +
 
 up_4FC <- ggplot(results) +
             geom_bar(aes(x = FC4_up)) +
-            geom_vline(xintercept = FC4_obs_up, color = "red", size=1) 
+            geom_vline(xintercept = FC4_obs_up, color = "red", size=1)
 
 down_4FC <- ggplot(results) +
               geom_bar(aes(x = FC4_down)) +
@@ -146,7 +146,7 @@ down_4FC <- ggplot(results) +
 
 up_core <- ggplot(results) +
               geom_bar(aes(x = core_up)) +
-              geom_vline(xintercept = core_obs_up, color = "red", size=1) 
+              geom_vline(xintercept = core_obs_up, color = "red", size=1)
 
 down_core <- ggplot(results) +
               geom_bar(aes(x = core_down)) +
