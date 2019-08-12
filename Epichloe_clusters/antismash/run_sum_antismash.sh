@@ -4,9 +4,9 @@
 
 
 SCRIPTDIR="/media/kate/Massey_linux_onl/projects/STROMATA/stromata_analysis/Epichloe_clusters/antismash/"
-DATADIR="/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/antismash/"
+RESDIR="/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/antismash/"
 
-cd $DATADIR
+cd $RESDIR
 
 mkdir results
 
@@ -39,4 +39,3 @@ rm ../results/Eel_masked_antismash_sum.txt
 echo -e "Chr\tregion\treg_start\treg_end\tgene_name\texons\tgene_start\tgene_end\tdesc\ttranslation" > ../results/Eel_masked_antismash_sum.txt
 for i in *region00*.gbk; do perl  $SCRIPTDIR/get_genbank_data.pl $i >> ../results/Eel_masked_antismash_sum.txt; done
 cd ..
-

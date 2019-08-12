@@ -9,7 +9,7 @@ library("tidyverse")
 
 
 ### Set defaults
-datadir <- "media/kate/Massey_linux_onl/projects/data/gene_model_sets/"
+datadir <- "/media/kate/Massey_linux_onl/projects/data/gene_model_sets/"
 resdir <- "/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/SMURF/"
 
 ### Read in command line arguments

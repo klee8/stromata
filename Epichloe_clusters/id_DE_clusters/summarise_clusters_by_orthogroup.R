@@ -1,21 +1,30 @@
 # Kate Lee 2019
 # summarise the groups of clusters and arrange by orthogroup
+# usage Rscript --vanilla < summarise_clusters_by_orthogroup.R <orthogroup file> <results directory>
 
 library(tidyverse)
 
-setwd("/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/id_DE_clusters/")
+# set defaults
+orth = "/media/kate/Massey_linux_onl/projects/data/gene_model_sets/proteinortho/flat_ortho_file.txt"
+resdir = "/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/id_DE_clusters/"
+
+args = commandArgs(trailingOnly=TRUE)
+if (args == 2){
+  orth = args[1]
+  resdir = args[2]
+}
 
 # read in ortholog flat file
-orth <- read.delim("../../../../data/gene_model_sets/proteinortho/flat_ortho_file.txt", sep = " ", header = TRUE)
+orth <- read.delim(orth, sep = " ", header = TRUE)
 orth$spp <- NULL
 orth$gene_id <- NULL
 orth_list <- data.frame(unique(orth$ortho_group))
 colnames(orth_list) <- c("ortho_group")
 
 # read in cluster groups for each interaction
-str_ps <- read.delim("STR_PS/cluster_groups.txt", header = TRUE, sep = "\t")
-str_inf <- read.delim("STR_INF/cluster_groups.txt", header = TRUE, sep = "\t")
-inf_ps <- read.delim("INF_PS/cluster_groups.txt", header = TRUE, sep = "\t")
+str_ps <- read.delim(paste(resdir, "STR_PS/cluster_groups.txt", sep = ""), header = TRUE, sep = "\t")
+str_inf <- read.delim(paste(resdir, "STR_INF/cluster_groups.txt", sep = ""), header = TRUE, sep = "\t")
+inf_ps <- read.delim(paste(resdir, "INF_PS/cluster_groups.txt", sep = ""), header = TRUE, sep = "\t")
 
 # divide files by species
 str_ps_el <- str_ps[ str_ps$species == "elymi", ]
@@ -99,6 +108,6 @@ keep <- c("ortho_group", "el_cluster", "el_cluster_size", "el_gene_id", "el_star
 str_inf_groups <- str_inf_groups[, keep]
 inf_ps_groups <- str_inf_groups[, keep]
 
-write.table(str_ps_groups, "STR_PS/str_ps_groups_file_for_ann.txt", quote = FALSE, row.names = FALSE)
-write.table(str_inf_groups, "STR_INF/str_inf_groups_file_for_ann.txt", quote = FALSE, row.names = FALSE)
-write.table(inf_ps_groups, "INF_PS/inf_ps_groups_file_for_ann.txt", quote = FALSE, row.names = FALSE)
+write.table(str_ps_groups, paste(resdir, "STR_PS/str_ps_groups_file_for_ann.txt", sep = ""), quote = FALSE, row.names = FALSE)
+write.table(str_inf_groups, paste(resdir, "STR_INF/str_inf_groups_file_for_ann.txt", sep = ""), quote = FALSE, row.names = FALSE)
+write.table(inf_ps_groups, paste(resdir, "INF_PS/inf_ps_groups_file_for_ann.txt", sep = ""), quote = FALSE, row.names = FALSE)
