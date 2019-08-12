@@ -1,18 +1,33 @@
 # Kate Lee 2019
 
+
+### Set defaults
+resdir <- "/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/SMURF/"
+ortho <- "/media/kate/Massey_linux_onl/projects/data/gene_model_sets/proteinortho/flat_ortho_file.txt"
+
+### Read in command line arguments
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) > 0) {
+  datadir = args[1]
+  if (length(args) ==2) {
+    resdir = args[2]
+  }
+}
+
+
 # read in ortholog flat file
-orth <- read.delim("flat_ortho_file.txt", sep = " ", header = TRUE) 
+orth <- read.delim(ortho, sep = " ", header = TRUE)
 orth$spp <- NULL
 
 # get SMURF secondary metabolite clusters
-ely <- read.delim("E.elymi_NfE728_results/SMURF_ely_rfmt.txt", sep = "\t", header = TRUE)
-fes <- read.delim("E.festucae_E2368_results/SMURF_fes_rfmt.txt", sep = "\t", header = TRUE)
-typ <- read.delim("E.typhina_E8_results/SMURF_typ_rfmt.txt", sep = "\t", header = TRUE)
+ely <- read.delim(paste(resdir, "E.elymi_NfE728_results/SMURF_ely_rfmt.txt", sep = ""), sep = "\t", header = TRUE)
+fes <- read.delim(paste(resdir, "E.festucae_E2368_results/SMURF_fes_rfmt.txt", sep = ""), sep = "\t", header = TRUE)
+typ <- read.delim(paste(resdir, "E.typhina_E8_results/SMURF_typ_rfmt.txt", sep = ""), sep = "\t", header = TRUE)
 
 # get backbone proteins (that SMURF clusters are based on)
-ely_bk <- read.delim("E.elymi_NfE728_results/Backbone-genes.txt", sep = "\t", header = TRUE)
-fes_bk <- read.delim("E.festucae_E2368_results/Backbone-genes.txt", sep = "\t", header = TRUE)
-typ_bk <- read.delim("E.typhina_E8_results/Backbone-genes.txt", sep = "\t", header = TRUE)
+ely_bk <- read.delim(paste(resdir, "E.elymi_NfE728_results/Backbone-genes.txt", sep = ""), sep = "\t", header = TRUE)
+fes_bk <- read.delim(paste(resdir, "E.festucae_E2368_results/Backbone-genes.txt", sep = ""), sep = "\t", header = TRUE)
+typ_bk <- read.delim(paste(resdir, "E.typhina_E8_results/Backbone-genes.txt", sep = ""), sep = "\t", header = TRUE)
 
 # reduce backbone protein table to just gene id and SMURF predicted function
 ely_bk <- ely_bk[, c("Backbone_gene_id", "SMURF_backbone_gene_prediction")]
@@ -52,6 +67,5 @@ SMURF <- merge(orth_list, ely, by = "ortho_group", all = TRUE)
 SMURF <- merge(SMURF, fes, by = "ortho_group", all = TRUE)
 SMURF <- merge(SMURF, typ, by = "ortho_group", all = TRUE)
 
-head(SMURF)
-write.table(SMURF, "SMURF_flat_results_by_orthologs.txt", sep = "\t", quote = FALSE, row.names = FALSE)
-
+#head(SMURF)
+write.table(SMURF, paste(resdir, "SMURF_flat_results_by_orthologs.txt", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
