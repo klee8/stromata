@@ -4,11 +4,11 @@
 
 #  DE permutations
 #  usage:  Rscript --vanilla DE_permutations.R <reformatted core gene file>
-#  output: *_permute_DE_results.txt,  *_permuted_DE_clusters.pdf
+#  output: *_permuted_DE_results.txt,  *_permuted_DE_clusters.pdf
 
 #  Cluster permutations
 #  usage: Rscript --vanilla clusters_permutation.R <basefilename> <number of simulations>
-#  output:
+#  output: *_cluster_results.txt, _permuted_DE_cluster_results.txt, STR_PS_permuted_DE_clusters.pdf
 
 #!usr/bin/bash
 

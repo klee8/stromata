@@ -17,7 +17,7 @@ if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
   infile = paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "")
-  outfile = paste(args[1], "_permute_DE_results.txt", sep = "")
+  outfile = paste(args[1], "_permuted_DE_results.txt", sep = "")
   graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
   nsim = as.numeric(args[2])
 }
