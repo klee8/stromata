@@ -13,8 +13,8 @@
 # outputs:  *_group_file_for_ann.txt (one line per ortholog to merge with annotations)
 
 
-SCRIPTDIR="/media/kate/Massey_linux_onl/projects/STROMATA/stromata_analysis/Epichloe_clusters/id_DE_clusters"
-RESDIR="/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/id_DE_clusters"
+SCRIPTDIR="/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters"
+RESDIR="/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters"
 
 cd $RESDIR
 
