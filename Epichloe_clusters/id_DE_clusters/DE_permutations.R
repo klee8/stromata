@@ -12,15 +12,24 @@
 library(tidyverse)
 library(ggpubr)
 
+
+## for testing only
+#setwd("/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS")
+#args <- c("STR_PS", 10)
+
+## read in command line arguments
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
-  infile = paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "")
-  outfile = paste(args[1], "_permuted_DE_results.txt", sep = "")
-  graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
-  nsim = as.numeric(args[2])
+  infile <- paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "")
+  raw <- paste(args[1], "_raw_counts.txt", sep = "")
+  outfile <- paste(args[1], "_permuted_DE_results.txt", sep = "")
+  summaryfile <- paste(args[1], "_permuted_DE_summary.txt", sep = "")
+  graphout <- paste(args[1], "_permuted_DE_results.pdf", sep = "")
+  nsim <- ifelse( length(args) ==2, as.numeric(args[2]), 10000)
 }
+print(getwd())
 print(paste("infile: ", infile))
 print(paste("outfile: ", outfile))
 print(paste("graph file: ", graphout))
@@ -49,7 +58,9 @@ data <- data %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
 data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE", "DE2", "DE4")]
 
 # total genes and total number of DE genes per species
-data %>% group_by(species) %>% summarise(total = n(), total_DE2 = sum(DE2), total_DE4 = sum(DE4))
+raw_counts <- data %>% group_by(species) %>% summarise(total = n(), total_DE2 = sum(DE2), total_DE4 = sum(DE4))
+
+write.table(raw_counts, raw, quote = FALSE, row.names = FALSE)
 
 # total number of ortholog overlaps in observed data
 data <- data %>%
@@ -102,55 +113,62 @@ colnames(permutations) <- c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up
 write.table(permutations, outfile, quote = FALSE, row.names = FALSE)
 
 # observed permutation results
-FC2_obs_up <- nrow(filter(data, (FC2_overlaps == 1) & (dir_FC == "+")))
-FC2_obs_down <- nrow(filter(data, (FC2_overlaps == 1) & (dir_FC == "-")))
-FC4_obs_up <- nrow(filter(data, (FC4_overlaps == 1) & (dir_FC == "+")))
-FC4_obs_down <- nrow(filter(data, (FC4_overlaps == 1) & (dir_FC == "-")))
-core_obs_up <- nrow(filter(data, (core_overlaps == 1) & (dir_FC == "+")))
-core_obs_down <- nrow(filter(data, (core_overlaps == 1) & (dir_FC == "-")))
+obs_FC2_up <- nrow(filter(data, (FC2_overlaps == 1) & (dir_FC == "+")))
+obs_FC2_down <- nrow(filter(data, (FC2_overlaps == 1) & (dir_FC == "-")))
+obs_FC4_up <- nrow(filter(data, (FC4_overlaps == 1) & (dir_FC == "+")))
+obs_FC4_down <- nrow(filter(data, (FC4_overlaps == 1) & (dir_FC == "-")))
+obs_core_up <- nrow(filter(data, (core_overlaps == 1) & (dir_FC == "+")))
+obs_core_down <- nrow(filter(data, (core_overlaps == 1) & (dir_FC == "-")))
 
-pvalue_FC2_up <- ((nrow(permutations[permutations$FC2_up >= FC2_obs_up, ])+1)/(nsim + 1))
-pvalue_FC2_down <- ((nrow(permutations[permutations$FC2_down <= FC2_obs_down, ])+1)/(nsim + 1))
-pvalue_FC4_up <- ((nrow(permutations[permutations$FC4_up >= FC4_obs_up, ])+1)/(nsim + 1))
-pvalue_FC4_down <- ((nrow(permutations[permutations$FC4_down <= FC4_obs_down, ])+1)/(nsim + 1))
-pvalue_core_up <- ((nrow(permutations[permutations$core_up >= core_obs_up, ])+1)/(nsim + 1))
-pvalue_core_down <- ((nrow(permutations[permutations$core_down <= core_obs_down, ])+1)/(nsim + 1))
+pvalue_FC2_up <- ((nrow(permutations[permutations$FC2_up >= obs_FC2_up, ])+1)/(nsim + 1))
+pvalue_FC2_down <- ((nrow(permutations[permutations$FC2_down <= obs_FC2_down, ])+1)/(nsim + 1))
+pvalue_FC4_up <- ((nrow(permutations[permutations$FC4_up >= obs_FC4_up, ])+1)/(nsim + 1))
+pvalue_FC4_down <- ((nrow(permutations[permutations$FC4_down <= obs_FC4_down, ])+1)/(nsim + 1))
+pvalue_core_up <- ((nrow(permutations[permutations$core_up >= obs_core_up, ])+1)/(nsim + 1))
+pvalue_core_down <- ((nrow(permutations[permutations$core_down <= obs_core_down, ])+1)/(nsim + 1))
 
-pvalue_FC2_up
-pvalue_FC2_down
-pvalue_FC4_up
-pvalue_FC4_down
-pvalue_core_up
-pvalue_core_down
+
+summary <- data.frame()
+for (i in colnames(permutations)){
+    overlap <- as.factor(i)
+    range <- as.integer(range(permutations[, c(i)]))
+    pvalue <- as.numeric(get(paste("pvalue_", i, sep = "")))
+    row <- c(overlap, range, pvalue)
+    summary <- rbind(summary, row)
+}
+colnames(summary) <- c("overlap", "range_start","range_end", "pvalue")
+
+write.table(summary, summaryfile, quote = FALSE, row.names = FALSE)
+
+
 
 results <- permutations
 #####  GRAPH PERMUTATIONS
 
 up_2FC <- ggplot(results) +
-            facet_grid( . ~ species) +
             geom_bar(aes(x = FC2_up)) +
-            geom_vline(xintercept = FC2_obs_up, color = "red", size=1)
-up_2FC
+            geom_vline(xintercept = obs_FC2_up, color = "red", size=1)
+
 down_2FC <- ggplot(results) +
               geom_bar(aes(x = FC2_down)) +
-              geom_vline(xintercept = FC2_obs_down, color = "red", size=1)
+              geom_vline(xintercept = obs_FC2_down, color = "red", size=1)
 
 
 up_4FC <- ggplot(results) +
             geom_bar(aes(x = FC4_up)) +
-            geom_vline(xintercept = FC4_obs_up, color = "red", size=1)
+            geom_vline(xintercept = obs_FC4_up, color = "red", size=1)
 
 down_4FC <- ggplot(results) +
               geom_bar(aes(x = FC4_down)) +
-              geom_vline(xintercept = FC4_obs_down, color = "red", size=1)
+              geom_vline(xintercept = obs_FC4_down, color = "red", size=1)
 
 up_core <- ggplot(results) +
               geom_bar(aes(x = core_up)) +
-              geom_vline(xintercept = core_obs_up, color = "red", size=1)
+              geom_vline(xintercept = obs_core_up, color = "red", size=1)
 
 down_core <- ggplot(results) +
               geom_bar(aes(x = core_down)) +
-              geom_vline(xintercept = core_obs_down, color = "red", size=1)
+              geom_vline(xintercept = obs_core_down, color = "red", size=1)
 
 # see combined fig example http://www.sthda.com/english/articles/32-r-graphics-essentials/126-combine-multiple-ggplots-in-one-graph/
 figure <- ggarrange(up_2FC, down_2FC, up_4FC, down_4FC, up_core, down_core,
