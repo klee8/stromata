@@ -10,6 +10,15 @@ library(topGO)
 library(tidyverse)
 library(Rgraphviz)
 
+
+### Sanity check 
+# have 88 up regulaged and 24 down regulated core genes.
+# should have this many genes of interest for each species, but generally getting 75 up and 22 down regulated genes
+# genesOfInterest list is the correct size
+# geneList is not.... CONCLUSION - check that these genes are not missing in the GO annotation file => They are ;)
+
+
+
 resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_stromata_DE/topGO"
 
 setwd(resdir)
@@ -39,8 +48,8 @@ check_toGO_input <- function(geneUniverse, geneList, geneID2GO){
   row <- paste(c(length(geneUniverse), length(geneList[geneList ==1]), length(geneID2GO)), collapse = "\t")
   write.table(row, "inputfile_stats.txt", quote = FALSE, row.names = FALSE, append = TRUE, col.names = FALSE)
 }
-names <- c("total_genes", "selected_genes", "genes_with_GO_ann", collapse = "\t")
-write.table(names, "input_stats.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+names <- paste(c("total_genes", "selected_goi", "genes_with_GO_ann"), collapse = "\t")
+write.table(names, "inputfile_stats.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 
 
@@ -58,16 +67,26 @@ geneID2GO <- readMappings(file = paste(name, "gene2GO.txt", sep = "_"))
 # subset DE information
 DE <- DE_all[, c( "festucae_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
 
+
+
 # set the gene universe (all genes considered) and the genes of interest
-temp <- as.data.frame(go_terms[go_terms$qpid %in% DE$festucae_gene_id, as.character(c("qpid"))])
-geneUniverse <- temp$qpid
-genesOfInterest <- as.character(DE[(DE$core_up == 1), c("festucae_gene_id")])
+geneUniverse <- go_terms$qpid
+
+# UPREGULATED
+
+    genesOfInterest <- as.character(DE[(DE$core_up == 1), c("festucae_gene_id")])
+    #fes_up_goi <- genesOfInterest
 
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
+    missing <- factor(as.integer(genesOfInterest %in% geneUniverse))
+    names(missing) <- genesOfInterest
     names(geneList) <- geneUniverse
     check_toGO_input(geneUniverse, geneList, geneID2GO)
     
+    #fes_up_list <- geneList[geneList == 1]
+    #fes_up_missing <- names(missing[missing == 0])
+
     # create GOdata object
     myGOdata <- new("topGOdata", description="festucae_core_up_DE_BP", ontology="BP", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
     resultFisher <- runTest(myGOdata, algorithm='weight01', statistic="fisher")
@@ -97,8 +116,10 @@ genesOfInterest <- as.character(DE[(DE$core_up == 1), c("festucae_gene_id")])
     printGraph(myGOdata, resultFisher, firstSigNodes = 5, fn.prefix = "festucae_core_up_MF", useInfo = "all", pdfSW = TRUE)
     keep_fish(resultFisher)
 
-genesOfInterest <- as.character(DE[(DE$core_down == 1), c("festucae_gene_id")])
+# DOWNREGULATED
     
+    genesOfInterest <- as.character(DE[(DE$core_down == 1), c("festucae_gene_id")])
+    #fes_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     names(geneList) <- geneUniverse
@@ -150,10 +171,12 @@ genesOfInterest <- as.character(DE[(DE$core_down == 1), c("festucae_gene_id")])
     DE <- DE_all[, c( "typhina_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
     
     # set the gene universe (all genes considered) and the genes of interest
-    temp <- as.data.frame(go_terms[go_terms$qpid %in% DE$typhina_gene_id, as.character(c("qpid"))])
-    geneUniverse <- temp$qpid
-genesOfInterest <- as.character(DE[(DE$core_up == 1), c("typhina_gene_id")])
+    geneUniverse <- go_terms$qpid
     
+# UPREGULATED
+    genesOfInterest <- as.character(DE[(DE$core_up == 1), c("typhina_gene_id")])
+    #typ_up_goi <- genesOfInterest
+
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     names(geneList) <- geneUniverse
@@ -187,8 +210,10 @@ genesOfInterest <- as.character(DE[(DE$core_up == 1), c("typhina_gene_id")])
     printGraph(myGOdata, resultFisher, firstSigNodes = 5, fn.prefix = "typhina_core_up_MF", useInfo = "all", pdfSW = TRUE)
     keep_fish(resultFisher)
 
-genesOfInterest <- as.character(DE[(DE$core_down == 1), c("typhina_gene_id")])
+# DOWNREGULATED
     
+    genesOfInterest <- as.character(DE[(DE$core_down == 1), c("typhina_gene_id")])
+    #typ_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     names(geneList) <- geneUniverse
@@ -223,15 +248,13 @@ genesOfInterest <- as.character(DE[(DE$core_down == 1), c("typhina_gene_id")])
     keep_fish(resultFisher)
 
 
-    
-    
 
 
 #####     ELYMI
     
     
     # read in pannzer annotations and put into topGO datastructure geneID2GO
-    pannzer <- read.table("../Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_GO.txt", header = TRUE, sep = "\t", colClasses="character")
+    pannzer <- read.delim("../Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_GO.txt", header = TRUE, sep = "\t", colClasses="character")
     name <- "elymi"
     go_terms <- pannzer %>% group_by(qpid) %>% summarise(go_terms = paste(sapply(as.character(goid), function(x) paste("GO:", x, sep = "")), collapse = ", "))
     go_terms$qpid <- gsub("-T1", "", go_terms$qpid )
@@ -242,16 +265,17 @@ genesOfInterest <- as.character(DE[(DE$core_down == 1), c("typhina_gene_id")])
     DE <- DE_all[, c( "elymi_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
     
     # set the gene universe (all genes considered) and the genes of interest
-    temp <- as.data.frame(go_terms[go_terms$qpid %in% DE$elymi_gene_id, as.character(c("qpid"))])
-    geneUniverse <- temp$qpid
-    check_toGO_input(geneUniverse, geneList, geneID2GO)
+    geneUniverse <- go_terms$qpid
 
-genesOfInterest <- as.character(DE[(DE$core_up == 1), c("elymi_gene_id")])
+# UPREGULATED
     
+    genesOfInterest <- as.character(DE[(DE$core_up == 1), c("elymi_gene_id")])
+    #ely_up_goi <- genesOfInterest
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     names(geneList) <- geneUniverse
-    
+    check_toGO_input(geneUniverse, geneList, geneID2GO)
+
     # create GOdata object
     myGOdata <- new("topGOdata", description="elymi_core_up_DE_BP", ontology="BP", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
     resultFisher <- runTest(myGOdata, algorithm='weight01', statistic="fisher")
@@ -280,8 +304,10 @@ genesOfInterest <- as.character(DE[(DE$core_up == 1), c("elymi_gene_id")])
     printGraph(myGOdata, resultFisher, firstSigNodes = 5, fn.prefix = "elymi_core_up_MF", useInfo = "all", pdfSW = TRUE)
     keep_fish(resultFisher)
 
-genesOfInterest <- as.character(DE[(DE$core_down == 1), c("elymi_gene_id")])
+# DOWNREGULATED
     
+    genesOfInterest <- as.character(DE[(DE$core_down == 1), c("elymi_gene_id")])
+    #ely_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     names(geneList) <- geneUniverse
