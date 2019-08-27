@@ -1,10 +1,18 @@
 # randomise DE and see if you can still identify clusters
 
-
+#install.packages("doParallel")
+library(doParallel)
 library(tidyverse)
 
 
-args = commandArgs(trailingOnly=TRUE)
+###############################################################
+#           GET FILENAMES AND NUMBER OF SIMULATIONS NEEDED 
+###############################################################
+
+#args = commandArgs(trailingOnly=TRUE) 
+args = c("STR_PS", 100)
+
+
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
@@ -21,9 +29,6 @@ print(outfile2)
 print(graphout)
 print(nsim)
 
-#infile <- "../core_gene_sets/core_genes_INF_PS_rfmt.txt"
-#outfile1 <- "INF_PS_observed_clusters.txt"
-#outfile2 <- "INF_PS_permuted_DE_cluster_numbers.txt"
 
 # read in reformatted data
 df <- read.delim(infile, header = TRUE, sep = "\t")
@@ -42,28 +47,29 @@ df <- df %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
 df <- df[order(df$species, df$contig, df$start),]
 
 # identify groups of genes, changing group number when DE changes direction or contig changes
-changes <- function(a, b, x, y) {
-  if (is.na(y) | is.na(x) | is.na(a) | is.na(b)) {counter <<- counter + 1}
-  else if (x != y) {counter <<- counter + 1}
-  else if (a != b) {counter <<- counter + 1}
-  return(counter)
+DE_change_groups <- function(contig, lag_contig, direction_FC, lag_direction_FC) {
+  if (is.na(direction_FC) | is.na(lag_direction_FC) | is.na(contig) | is.na(lag_contig)) {total_groups <<- total_groups + 1}
+  else if (contig != lag_contig) {total_groups <<- total_groups + 1}
+  else if (direction_FC != lag_direction_FC) {total_groups <<- total_groups + 1}
+  return(total_groups)
 }
-counter <- 0
+total_groups <- 0
 df$temp_contig <- lag(df$contig)
 df$temp_dirFC <- lag(df$dir_FC)
-df$change <- mapply(changes, df$contig, df$temp_contig, df$dir_FC, df$temp_dirFC)
+df$change <- mapply(DE_change_groups, df$contig, df$temp_contig, df$dir_FC, df$temp_dirFC)
 df$temp_contig <- NULL
 df$temp_dirFC <- NULL
 
 # identify clusters in each spp by collapsing each group of gene DE results into a string
 # assess with regex
 clusters <- data.frame()
-#my_orths <- as.character()
-#my_genes <- as.character()
-for (group in 1:counter) {
+my_orths <- as.character()
+my_genes <- as.character()
+for (group in 1:total_groups) {
   DEstring <- paste(df[df$change == group, c("DE")], collapse = "")
-  #DEorths <- df[df$change == group, c("orthogroup")]
-  #DEgenes <- df[df$change == group, c("gene_id")]
+  spp <- as.character(unique(df[df$change == group, c("species")]))
+  DEorths <- df[df$change == group, c("orthogroup")]
+  DEgenes <- df[df$change == group, c("gene_id")]
   if (grepl("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE)) {
     temp <- (gregexpr("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE))
     for (i in temp) {
@@ -71,27 +77,25 @@ for (group in 1:counter) {
       len <- (attr(temp[1][[1]], "match.length"))
       clust <- substr(DEstring, pos, (pos + len -1))
       if ((len > 3) || ( (len == 3) & (grepl('0', clust, perl = TRUE) == FALSE) ) ){
-        #orths <- paste(DEorths[pos:(pos +len -1)], collapse = ",")
-        #genes <- paste(DEgenes[pos:(pos +len -1)], collapse = ",")
-        #my_orths <- c(my_orths, orths)
-        #my_genes <- c(my_genes, genes)
-        row <- c(as.numeric(group), as.numeric(clust), as.numeric(pos), as.numeric(len))
-        clusters <- rbind(clusters, row)
+        orths <- paste(DEorths[pos:(pos + len -1)], collapse = ",")
+        genes <- paste(DEgenes[pos:(pos + len -1)], collapse = ",")
+        my_orths <- c(my_orths, orths, stringsAsFactors = FALSE)
+        my_genes <- c(my_genes, genes, stringsAsFactors = FALSE)
+        row <- c(spp, group, clust, pos, len, orths, genes)
+        clusters <- rbind(clusters, row, stringsAsFactors = FALSE)
       }
     }
   }
 }
-# add orth and gene lists
-#clusters <- cbind(clusters, my_orths)
-#clusters <- cbind(clusters, my_genes)
-#colnames(clusters) <- c("group", "cluster_DE", "pos", "len", "orths", "genes")
-
-
-colnames(clusters) <- c("group", "cluster_DE", "pos", "len")
+colnames(clusters) <- c("species", "group", "cluster_DE", "pos", "len", "orths", "genes")
+head(clusters)
 
 # number of observed clusters
 obs_clusters <- nrow(clusters)
+obs_clusters
 
+str(clusters$len)
+str(clusters$pos)
 #####      Flag the genes that are in a cluster (and not just in a group of genes which has a cluster)
 prev <- 0
 flag <- 1
@@ -99,8 +103,8 @@ inclust <- as.character()
 for (x in df$change) {
   if (x != prev) { flag <-  1 }
   if (x %in% clusters$group) {
-    start <- clusters[clusters$group == x, c("pos")]
-    end <- clusters[clusters$group == x, c("pos")] + clusters[clusters$group == x, c("len")] - 1
+    start <- as.numeric(clusters[clusters$group == x, c("pos")])
+    end <- as.numeric(clusters[clusters$group == x, c("pos")]) + as.numeric(clusters[clusters$group == x, c("len")]) - 1
     if ( (start <= flag) & (flag <= end ) ) {
       inclust <- c(inclust, x)
   }
@@ -121,9 +125,11 @@ df$clust_cig <- sapply(df$in_cluster, function(x) ifelse( x %in% clusters$group,
 write.table(df, outfile1, row.names = FALSE, quote = FALSE, sep = "\t")
 
 
-# permute DE and check number of clusters found
-num_clusters <- as.numeric()
-for (i in 1:nsim) {
+################################################
+#             PERMUTATION TEST                 
+################################################
+
+permute_clusters <- function(df, total_groups) {
   ## standard approach: scramble response value
   bdat <- data.frame()
   for (spp in unique(df$species)) {
@@ -132,10 +138,20 @@ for (i in 1:nsim) {
     tmp <- transform(tmp, DE2 = ifelse((DE == 1) | (DE == 2), 1, 0), DE4 = ifelse((DE == 2), 1, 0))
     bdat <- rbind(bdat, tmp)
   }
+  
+  # order dataframe
+  bdat <- bdat[order(bdat$species, bdat$contig, bdat$start),]
+  
+  # flag direction of fold change
+  bdat <- bdat %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
+  # flag when direction of DE or contig (including across species) changes
+  bdat$temp_contig <- lag(bdat$contig)
+  bdat$temp_dirFC <- lag(bdat$dir_FC)
+  bdat$change <- mapply(DE_change_groups, bdat$contig, bdat$temp_contig, bdat$dir_FC, bdat$temp_dirFC)
 
   # check number of clusters found in this permutation
   tmp_clusters <- data.frame()
-  for (group in 1:counter) {
+  for (group in 1:total_groups) {
     DEstring <- paste(bdat[bdat$change == group, c("DE")], collapse = "")
     if (grepl("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE)) {
       temp <- (gregexpr("[1,2]+[0]{0,1}[1,2]+", DEstring, perl = TRUE))
@@ -150,10 +166,18 @@ for (i in 1:nsim) {
       }
     }
   }
-  num_clusters <- c(num_clusters, nrow(tmp_clusters))
+  return(nrow(tmp_clusters)) 
 }
 
-write.table(num_clusters, outfile2, quote = FALSE, row.names = FALSE, sep = "\t")
+nsim <- 5
+
+# run permutation function with foreach parellisation 
+n.cores <- detectCores()
+registerDoParallel(n.cores)
+num_clusters <- foreach(k = 1:nsim, .combine = c) %dopar% permute_clusters(df, total_groups)
+num_clusters
+#write.table(num_clusters, outfile2, quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t", append = TRUE)
+
 
 ggplot() +
   geom_bar(aes(x = num_clusters)) +
