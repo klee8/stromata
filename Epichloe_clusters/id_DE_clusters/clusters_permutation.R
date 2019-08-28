@@ -9,17 +9,17 @@ library(tidyverse)
 #           GET FILENAMES AND NUMBER OF SIMULATIONS NEEDED 
 ###############################################################
 
-#args = commandArgs(trailingOnly=TRUE) 
-args = c("STR_PS", 100)
-
+#args = c("STR_PS", 100)
+args = commandArgs(trailingOnly=TRUE) 
+dir.create("cluster_perm_results")
 
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
-  infile = paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "") #| "../core_gene_sets/core_genes_INF_PS_rfmt.txt"
-  outfile1 = paste(args[1], "_cluster_results.txt", sep = "") #| "observed_clusters.txt"
-  outfile2 = paste(args[1], "_permuted_DE_cluster_results.txt", sep = "")   #| "permuted_data.txt"
-  graphout = paste(args[1], "_permuted_DE_clusters.pdf", sep = "")
+  infile = paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "") 
+  outfile1 = paste("cluster_perm_results/", args[1], "_cluster_results.txt", sep = "") 
+  outfile2 = paste("cluster_perm_results/", args[1], "_permuted_DE_cluster_results.txt", sep = "")   
+  graphout = paste("cluster_perm_results/", args[1], "_permuted_DE_clusters.pdf", sep = "")
   nsim = args[2] #|| 10000
 }
 
@@ -88,14 +88,11 @@ for (group in 1:total_groups) {
   }
 }
 colnames(clusters) <- c("species", "group", "cluster_DE", "pos", "len", "orths", "genes")
-head(clusters)
+#head(clusters)
 
 # number of observed clusters
 obs_clusters <- nrow(clusters)
-obs_clusters
 
-str(clusters$len)
-str(clusters$pos)
 #####      Flag the genes that are in a cluster (and not just in a group of genes which has a cluster)
 prev <- 0
 flag <- 1
@@ -166,21 +163,20 @@ permute_clusters <- function(df, total_groups) {
       }
     }
   }
+  write.table(nrow(tmp_clusters), outfile2, quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t", append = TRUE)
   return(nrow(tmp_clusters)) 
 }
 
-nsim <- 5
 
 # run permutation function with foreach parellisation 
 n.cores <- detectCores()
 registerDoParallel(n.cores)
 num_clusters <- foreach(k = 1:nsim, .combine = c) %dopar% permute_clusters(df, total_groups)
-num_clusters
-#write.table(num_clusters, outfile2, quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t", append = TRUE)
 
 
-ggplot() +
+# plot the 
+permutation_plot <- ggplot() +
   geom_bar(aes(x = num_clusters)) +
   geom_vline(xintercept = obs_clusters, color = "red", size=1)
 
-ggsave(graphout)
+ggsave(graphout, plot = permutation_plot)
