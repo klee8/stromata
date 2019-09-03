@@ -10,27 +10,41 @@
 #install.packages("tidyverse")
 #install.packages("ggpubr")
 #install.packages("data.table")
+#install.packages("doParallel")
+library(doParallel)
 library(tidyverse)
 library(ggpubr)
 library(data.table)
 
-## for testing only
-#setwd("/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS")
-#args <- c("STR_PS", 100)
+##### for testing only 
+#path_DE_fun <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/DE_fun.R"
+#datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
+#resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/"
+#args <- c("STR_PS", 10, path_DE_fun, datadir, resdir)
 
 ## read in command line arguments
-args = commandArgs(trailingOnly=TRUE)
-dir.create("DE_perm_results")
+#args = commandArgs(trailingOnly=TRUE)
+
 if (length(args)<1) {
-  stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
+  stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]> <path/DE_fun.R> <datadir> <resultsdir>.n", call.=FALSE)
 } else {
-  infile <- paste("../../rfmt_core_gene_sets/core_genes_", args[1], "_rfmt.txt", sep = "")
+  basefilename <- args[1]
+  nsim <- ifelse( length(args) ==2, as.numeric(args[2]), 10000)
+  DE_fun <- args[3]
+  datadir <- args[4]
+  resdir <- args[5]
+  infile <- paste(datadir, "core_genes_", args[1], "_rfmt.txt", sep = "")
   raw <- paste("DE_perm_results/", args[1], "_raw_counts.txt", sep = "")
+  obsfile <- paste("DE_perm_results/", args[1], "_observed_DE_results.txt", sep = "")
   outfile <- paste("DE_perm_results/", args[1], "_permuted_DE_results.txt", sep = "")
   summaryfile <- paste("DE_perm_results/", args[1], "_permuted_DE_summary.txt", sep = "")
   graphout <- paste("DE_perm_results/", args[1], "_permuted_DE_results.pdf", sep = "")
-  nsim <- ifelse( length(args) ==2, as.numeric(args[2]), 10000)
+
 }
+
+source(DE_fun)
+setwd(paste(resdir, basefilename, sep = "" ))
+dir.create("DE_perm_results")
 print(getwd())
 print(paste("infile: ", infile))
 print(paste("outfile: ", outfile))
@@ -47,51 +61,27 @@ data <- data_rfmt[!is.na(data_rfmt$log2fc),]
 # remove any duplicate rows
 data <- data %>% distinct
 
-# set DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005
-data <- data %>% mutate(DE = ifelse((log2fc >= 2) &(svalue_1 <= 0.005), 2,
-                                        ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0)),
-                            DE2 = ifelse((log2fc >= 1) &(svalue_1 <= 0.005), 1, 0),
-                            DE4 = ifelse((log2fc >= 2) &(svalue_1 <= 0.005), 1, 0))
+# add column which sets DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005
+data <- DE_categories(data)
 
 # flag direction of fold change
 data <- data %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
 
 # subset data
-data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE", "DE2", "DE4")]
+data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE")] 
 
 # total genes and total number of DE genes per species
-raw_counts <- data %>% group_by(species) %>% summarise(total = n(), total_DE2 = sum(DE2), total_DE4 = sum(DE4))
+raw_counts <- species_raw_DE_counts(data)
 
-write.table(raw_counts, raw, quote = FALSE, row.names = FALSE)
+# find ortholog overlaps 
+max_spp <- (length(unique(data$species)))
+overlaps <- DE_overlaps(data)
 
-# find rtholog overlaps 
-DE_overlaps <- function(data) {
-  res <- data %>%
-    group_by(orthogroup) %>%
-    mutate(number_spp = length(unique(species)),
-           FC2_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == length(unique(species))), 1, 0),
-           FC4_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE4) == length(unique(species))), 1, 0),
-           core_overlaps = ifelse((length(unique(species)) > 1) & (sum(DE2) == (length(unique(species)))) & (sum(DE4) >= 1), 1, 0))
-  return(res)
-}
-
-data <- DE_overlaps(data)
-
+# OBSERVED DATA RESULTS
 # count up total number of each kind of overlap
-total_overlaps <- function(res){
-  FC4_up <- nrow(filter(res, (FC4_overlaps == 1) & (dir_FC == "+")))
-  FC4_down <- nrow(filter(res, (FC4_overlaps == 1) & (dir_FC == "-")))
-  FC2_up <- nrow(filter(res, (FC2_overlaps == 1) & (dir_FC == "+")))
-  FC2_down <- nrow(filter(res, (FC2_overlaps == 1) & (dir_FC == "-")))
-  core_up <- nrow(filter(res, (core_overlaps == 1) & (dir_FC == "+")))
-  core_down <- nrow(filter(res, (core_overlaps == 1) & (dir_FC == "-")))
-  tmp <- c(FC4_up, FC4_down, FC2_up, FC2_down, core_up, core_down)
-  return(tmp)
-}
-# observed data results
-obs <- total_overlaps(data)
-names(obs) <-  c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up", "core_down")
-obs
+obs <- total_overlaps(overlaps, max_spp)
+names(obs) <-  c("core_up", "FC2_up", "FC4_up", "core_down", "FC2_down", "FC4_down")
+write.table(obs, obsfile, quote = FALSE, row.names = FALSE, sep = "\t")
 
 ############  PERMUTE DATA
 
@@ -101,32 +91,14 @@ set.seed(101) ## for reproducibility
 headers <-  c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up", "core_down")
 fwrite(as.list(headers), file = outfile, sep = "\t")
 
-# permutation test
-DE_permutation <- function(data) {
-  ## standard approach: scramble response value
-  bdat <- data.frame()
-  for (spp in unique(data$species)) {
-    perm <- sample(nrow(data[data$species == spp,]))
-    tmp <- transform(data[data$species == spp,], DE = DE[perm])
-    tmp <- transform(tmp, DE2 = ifelse((DE == 1) | (DE == 2), 1, 0), DE4 = ifelse((DE == 2), 1, 0))
-    bdat <- rbind(bdat, tmp)
-  }
-  ## check the number of ortholog overlaps and store them
-  res <- DE_overlaps(bdat)
-  tmp <- as.vector(total_overlaps(res))
-  fwrite(as.list(tmp), file = outfile, sep = "\t", append = TRUE)
-  return(tmp)
-}
-
 # run permutation function with foreach parellisation 
 n.cores <- detectCores()
 registerDoParallel(n.cores)
-permutations <- foreach(k = 1:nsim, .combine = "rbind") %dopar% DE_permutation(data)
+permutations <- foreach(k = 1:nsim, .combine = "rbind") %dopar% DE_permutation(data, outfile)
 permutations <- as.data.frame(permutations)
 colnames(permutations) <-  c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up", "core_down")
 rownames(permutations) <- NULL
 head(permutations)
-
 
 
 pvalue_FC2_up <- ((nrow(permutations[permutations$FC2_up >= obs["FC2_up"], ])+1)/(nsim + 1))
@@ -148,30 +120,30 @@ colnames(summary) <- c("overlap", "range_start","range_end", "pvalue")
 summary$overlap <- colnames(permutations)
 write.table(summary, summaryfile, quote = FALSE, row.names = FALSE)
 
-results <- permutations
+
 #####  GRAPH PERMUTATIONS
 
-up_2FC <- ggplot(results) +
+up_2FC <- ggplot(permutations) +
             geom_bar(aes(x = FC2_up)) +
             geom_vline(xintercept = obs["FC2_up"], color = "red", size=1)
 
-down_2FC <- ggplot(results) +
+down_2FC <- ggplot(permutations) +
               geom_bar(aes(x = FC2_down)) +
               geom_vline(xintercept = obs["FC2_down"], color = "red", size=1)
 
-up_4FC <- ggplot(results) +
+up_4FC <- ggplot(permutations) +
             geom_bar(aes(x = FC4_up)) +
             geom_vline(xintercept = obs["FC4_up"], color = "red", size=1)
 
-down_4FC <- ggplot(results) +
+down_4FC <- ggplot(permutations) +
               geom_bar(aes(x = FC4_down)) +
               geom_vline(xintercept = obs["FC4_down"], color = "red", size=1)
 
-up_core <- ggplot(results) +
+up_core <- ggplot(permutations) +
               geom_bar(aes(x = core_up)) +
               geom_vline(xintercept = obs["core_up"], color = "red", size=1)
 
-down_core <- ggplot(results) +
+down_core <- ggplot(permutations) +
               geom_bar(aes(x = core_down)) +
               geom_vline(xintercept = obs["core_down"], color = "red", size=1)
 
