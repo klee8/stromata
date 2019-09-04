@@ -13,24 +13,27 @@
 #!usr/bin/bash
 
 
-SCRIPTDIR="/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters"
-RESDIR="/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters"
+FUNPATH="/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/DE_fun.R"
+DATADIR="/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
+RESDIR="/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/"
 
 cd $RESDIR
 
+mkdir STR_PS INF_PS STR_INF
+
 #####   DE permutations
 cd STR_PS
-#Rscript --vanilla $SCRIPTDIR/DE_permutations.R STR_PS 1000000
-#cd ../INF_PS
-#Rscript --vanilla $SCRIPTDIR/DE_permutations.R INF_PS 1000000
-#cd ../STR_INF
-#Rscript --vanilla $SCRIPTDIR/DE_permutations.R STR_INF 1000000
+Rscript --vanilla $SCRIPTDIR/DE_permutations.R STR_PS 10000 $FUNPATH $DATADIR $RESDIR
+cd ../INF_PS
+Rscript --vanilla $SCRIPTDIR/DE_permutations.R INF_PS 10000 $FUNPATH $DATADIR $RESDIR
+cd ../STR_INF
+Rscript --vanilla $SCRIPTDIR/DE_permutations.R STR_INF 10000 $FUNPATH $DATADIR $RESDIR
 
 #####   Cluster permutations
-#cd ../STR_PS
-#Rscript --vanilla $SCRIPTDIR/clusters_permutation.R STR_PS 1000000
-#cd ../INF_PS
-#Rscript --vanilla $SCRIPTDIR/clusters_permutation.R INF_PS 1000000
+cd ../STR_PS
+Rscript --vanilla $SCRIPTDIR/clusters_permutation.R STR_PS 10000 $FUNPATH $DATADIR $RESDIR
+cd ../INF_PS
+Rscript --vanilla $SCRIPTDIR/clusters_permutation.R INF_PS 10000 $FUNPATH $DATADIR $RESDIR
 cd ../STR_INF
-Rscript --vanilla $SCRIPTDIR/clusters_permutation.R STR_INF 1000000
+Rscript --vanilla $SCRIPTDIR/clusters_permutation.R STR_INF 10000 $FUNPATH $DATADIR $RESDIR
 cd ..
