@@ -35,7 +35,6 @@ if (length(args)<1) {
   resdir <- args[5]
   infile <- paste(datadir, "core_genes_", args[1], "_rfmt.txt", sep = "")
   raw <- paste("DE_perm_results/", args[1], "_raw_counts.txt", sep = "")
-  obsfile <- paste("DE_perm_results/", args[1], "_observed_DE_results.txt", sep = "")
   outfile <- paste("DE_perm_results/", args[1], "_permuted_DE_results.txt", sep = "")
   summaryfile <- paste("DE_perm_results/", args[1], "_permuted_DE_summary.txt", sep = "")
   graphout <- paste("DE_perm_results/", args[1], "_permuted_DE_results.pdf", sep = "")
