@@ -16,7 +16,7 @@ library(tidyverse)
 library(ggpubr)
 library(data.table)
 
-##### for testing only 
+##### for testing only
 #path_DE_fun <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/DE_fun.R"
 #datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
 #resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/"
@@ -29,7 +29,7 @@ if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]> <path/DE_fun.R> <datadir> <resultsdir>.n", call.=FALSE)
 } else {
   basefilename <- args[1]
-  nsim <- ifelse( length(args) ==2, as.numeric(args[2]), 10000)
+  nsim <- as.numeric(args[2])
   DE_fun <- args[3]
   datadir <- args[4]
   resdir <- args[5]
@@ -43,13 +43,15 @@ if (length(args)<1) {
 }
 
 source(DE_fun)
-setwd(paste(resdir, basefilename, sep = "" ))
 dir.create("DE_perm_results")
 print(getwd())
+print(DE_fun)
 print(paste("infile: ", infile))
 print(paste("outfile: ", outfile))
 print(paste("graph file: ", graphout))
 print(paste("nsim: ", nsim))
+print(paste(resdir, basefilename, sep = "" ))
+setwd(paste(resdir, basefilename, sep = "" ))
 
 #####      Read in the data from the core gene set analysis (this shows a line for every ortholog described in the gene set)
 
@@ -68,12 +70,12 @@ data <- DE_categories(data)
 data <- data %>% mutate(dir_FC = ifelse((log2fc < 0), "-", "+"))
 
 # subset data
-data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE")] 
+data <- data[, c("species", "orthogroup", "gene_id", "dir_FC", "DE")]
 
 # total genes and total number of DE genes per species
 raw_counts <- species_raw_DE_counts(data)
 
-# find ortholog overlaps 
+# find ortholog overlaps
 max_spp <- (length(unique(data$species)))
 overlaps <- DE_overlaps(data)
 
@@ -81,43 +83,46 @@ overlaps <- DE_overlaps(data)
 # count up total number of each kind of overlap
 obs <- total_overlaps(overlaps, max_spp)
 names(obs) <-  c("core_up", "FC2_up", "FC4_up", "core_down", "FC2_down", "FC4_down")
-write.table(obs, obsfile, quote = FALSE, row.names = FALSE, sep = "\t")
 
 ############  PERMUTE DATA
 
 set.seed(101) ## for reproducibility
 
 # set up permutation results outfile
-headers <-  c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up", "core_down")
+headers <-  c("core_up", "FC2_up", "FC4_up", "core_down", "FC2_down", "FC4_down")
 fwrite(as.list(headers), file = outfile, sep = "\t")
 
-# run permutation function with foreach parellisation 
+# run permutation function with foreach parellisation
 n.cores <- detectCores()
 registerDoParallel(n.cores)
 permutations <- foreach(k = 1:nsim, .combine = "rbind") %dopar% DE_permutation(data, outfile)
 permutations <- as.data.frame(permutations)
-colnames(permutations) <-  c("FC2_up", "FC2_down", "FC4_up", "FC4_down", "core_up", "core_down")
+colnames(permutations) <-  c("core_up", "FC2_up", "FC4_up", "core_down", "FC2_down", "FC4_down")
 rownames(permutations) <- NULL
 head(permutations)
+permutations
+str(nsim)
 
+pvalue_FC2_up <- 2*mean(permutations$FC4_up>=obs["FC2_up"])
+pvalue_FC2_down <- 2*mean(permutations$FC4_down>=obs["FC2_down"])
+pvalue_FC4_up <- 2*mean(permutations$FC4_up>=obs["FC4_up"])
+pvalue_FC4_down <- 2*mean(permutations$FC4_down>=obs["FC4_down"])
+pvalue_core_up <- 2*mean(permutations$core_up>=obs["core_up"])
+pvalue_core_down <- 2*mean(permutations$core_down>=obs["core_down"])
 
-pvalue_FC2_up <- ((nrow(permutations[permutations$FC2_up >= obs["FC2_up"], ])+1)/(nsim + 1))
-pvalue_FC2_down <- ((nrow(permutations[permutations$FC2_down <= obs["FC2_down"], ])+1)/(nsim + 1))
-pvalue_FC4_up <- ((nrow(permutations[permutations$FC4_up >= obs["FC4_up"], ])+1)/(nsim + 1))
-pvalue_FC4_down <- ((nrow(permutations[permutations$FC4_down <= obs["FC4_down"], ])+1)/(nsim + 1))
-pvalue_core_up <- ((nrow(permutations[permutations$core_up >= obs["core_up"], ])+1)/(nsim + 1))
-pvalue_core_down <- ((nrow(permutations[permutations$core_down <= obs["core_down"], ])+1)/(nsim + 1))
 
 summary <- data.frame()
 for (i in colnames(permutations)){
-    overlap <- as.factor(i)
+    overlap <- 1
     range <- as.integer(range(permutations[, c(i)]))
+    tmp <- 1
     pvalue <- as.numeric(get(paste("pvalue_", i, sep = "")))
-    row <- c(overlap, range[1], range[2], pvalue)
+    row <- c(overlap, range[1], range[2], tmp, pvalue)
     summary <- rbind(summary, row)
 }
-colnames(summary) <- c("overlap", "range_start","range_end", "pvalue")
+colnames(summary) <- c("overlap", "range_start","range_end", "observed", "pvalue")
 summary$overlap <- colnames(permutations)
+summary$observed <- obs
 write.table(summary, summaryfile, quote = FALSE, row.names = FALSE)
 
 
@@ -152,5 +157,3 @@ figure <- ggarrange(up_2FC, down_2FC, up_4FC, down_4FC, up_core, down_core,
                     labels = c("A", "B", "C", "D", "E", "F"),
                     ncol = 2, nrow = 3)
 ggsave(graphout, plot = figure)
-
-
