@@ -122,8 +122,8 @@ for (i in colnames(permutations)){
 colnames(summary) <- c("overlap", "range_start","range_end", "observed", "pvalue")
 summary$overlap <- colnames(permutations)
 summary$observed <- obs
-write.table(summary, summaryfile, quote = FALSE, row.names = FALSE)
-
+fwrite(as.list(paste("# summary of results from ", nsim, "random permutations:")), summaryfile)
+write.table(summary, summaryfile, quote = FALSE, row.names = FALSE, append = TRUE)
 
 #####  GRAPH PERMUTATIONS
 
