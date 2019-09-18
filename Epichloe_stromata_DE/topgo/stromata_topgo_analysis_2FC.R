@@ -5,7 +5,7 @@
 #if (!requireNamespace("BiocManager", quietly=TRUE))+     install.packages("BiocManager")
 #BiocManager::install()
 #BiocManager::install("topGO")
-# BiocManager::install("Rgraphviz")
+#BiocManager::install("Rgraphviz")
 #BiocManager::install("RCurl")
 library(topGO)
 library(tidyverse)
@@ -42,6 +42,8 @@ geneID2GO <- readMappings(file = paste(name, "gene2GO.txt", sep = "_"))
 DE <- DE_all[, c( "festucae_gene_id", "festucae_apeglm_log2FC", "festucae_apeglm_1_svalue")]
 DE$twoFC_up <- ifelse((DE$festucae_apeglm_log2FC >= 1) & (DE$festucae_apeglm_1_svalue <= 0.005), 1, 0)
 DE$twoFC_down <- ifelse((DE$festucae_apeglm_log2FC <= -1) & (DE$festucae_apeglm_1_svalue <= 0.005), 1, 0)
+# subset DE information
+#DE <- DE_all[, c( "festucae_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
 
 # set the gene universe (all genes considered) and the genes of interest
 geneUniverse <- go_terms$qpid
@@ -49,9 +51,10 @@ geneUniverse <- go_terms$qpid
 # UPREGULATED
 
     genesOfInterest <- as.character(DE[(DE$twoFC_up == 1), c("festucae_gene_id")])
+    #genesOfInterest <- as.character(DE[(DE$top_2FC_up == 1), c("festucae_gene_id")])
     #fes_up_goi <- genesOfInterest
 
-    # locations of genes of interest in the geneUniverse set in a named vector
+    # locations of genes of interest in the geneUniverse set in a named vector    
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
     missing <- factor(as.integer(genesOfInterest %in% geneUniverse))
     names(missing) <- genesOfInterest
@@ -74,7 +77,7 @@ geneUniverse <- go_terms$qpid
     KSRes <- GenTable(myGOdata, classicKS = resultKS, orderBy = "resultKS", ranksOf = "classicFisher", topNodes = 10)
     KSRes$test <- "festucae_2FC_up_DE_BP"
     write.table(KSRes, "all_KS_results_tests_top_ten.txt", quote = FALSE, row.names = FALSE, sep = "	", append = TRUE)
-    keep_ks(resultKS)
+    keep_ks(resultKS) 
     
     myGOdata <- new("topGOdata", description="festucae_2FC_up_DE_CC", ontology="CC", allGenes=geneList,  annot = annFUN.gene2GO, gene2GO = geneID2GO)
     resultFisher <- runTest(myGOdata, algorithm='weight01', statistic="fisher")
@@ -107,6 +110,7 @@ geneUniverse <- go_terms$qpid
 # DOWNREGULATED
     
     genesOfInterest <- as.character(DE[(DE$twoFC_down == 1), c("festucae_gene_id")])
+    #genesOfInterest <- as.character(DE[(DE$top_2FC_down == 1), c("festucae_gene_id")])
     #fes_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
@@ -161,9 +165,9 @@ geneUniverse <- go_terms$qpid
     
     
 #####     TYPHINA
-    
+     
     # read in pannzer annotations and put into topGO datastructure geneID2GO
-    
+     
     pannzer<- read.delim("../../Pannzer/E.typhina_E8/E.typhina_E8_pannzer_GO.txt", header = TRUE, sep = "\t")
     name <- "typhina"
     go_terms <- pannzer_to_topgo(pannzer)
@@ -176,12 +180,15 @@ geneUniverse <- go_terms$qpid
     DE$twoFC_up <- ifelse((DE$typhina_apeglm_log2FC >= 1) & (DE$typhina_apeglm_1_svalue <= 0.005), 1, 0)
     DE$twoFC_down <- ifelse((DE$typhina_apeglm_log2FC <= -1) & (DE$typhina_apeglm_1_svalue <= 0.005), 1, 0)
     
+    # subset DE information
+    #DE <- DE_all[, c( "typhina_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
+    
     # set the gene universe (all genes considered) and the genes of interest
     geneUniverse <- go_terms$qpid
     
 # UPREGULATED
     genesOfInterest <- as.character(DE[(DE$twoFC_up == 1), c("typhina_gene_id")])
-    #typ_up_goi <- genesOfInterest
+    #genesOfInterest <- as.character(DE[(DE$top_2FC_up == 1), c("typhina_gene_id")])
 
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
@@ -234,6 +241,7 @@ geneUniverse <- go_terms$qpid
 # DOWNREGULATED
     
     genesOfInterest <- as.character(DE[(DE$twoFC_down == 1), c("typhina_gene_id")])
+    #genesOfInterest <- as.character(DE[(DE$top_2FC_down == 1), c("typhina_gene_id")])
     #typ_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
@@ -300,7 +308,10 @@ geneUniverse <- go_terms$qpid
     # subset DE information
     DE <- DE_all[, c( "elymi_gene_id", "elymi_apeglm_log2FC", "elymi_apeglm_1_svalue")]
     DE$twoFC_up <- ifelse((DE$elymi_apeglm_log2FC >= 1) & (DE$elymi_apeglm_1_svalue <= 0.005), 1, 0)
-    DE$twoFC_up <- ifelse((DE$elymi_apeglm_log2FC <= -1) & (DE$elymi_apeglm_1_svalue <= 0.005), 1, 0)
+    DE$twoFC_down <- ifelse((DE$elymi_apeglm_log2FC <= -1) & (DE$elymi_apeglm_1_svalue <= 0.005), 1, 0)
+    
+    # subset DE information
+    #DE <- DE_all[, c( "elymi_gene_id", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down")]
     
     # set the gene universe (all genes considered) and the genes of interest
     geneUniverse <- go_terms$qpid
@@ -308,6 +319,7 @@ geneUniverse <- go_terms$qpid
 # UPREGULATED
     
     genesOfInterest <- as.character(DE[(DE$twoFC_up == 1), c("elymi_gene_id")])
+    #genesOfInterest <- as.character(DE[(DE$top_2FC_up == 1), c("elymi_gene_id")])
     #ely_up_goi <- genesOfInterest
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
@@ -360,6 +372,7 @@ geneUniverse <- go_terms$qpid
 # DOWNREGULATED
     
     genesOfInterest <- as.character(DE[(DE$twoFC_down == 1), c("elymi_gene_id")])
+    #  genesOfInterest <- as.character(DE[(DE$twp_2FC_down == 1), c("elymi_gene_id")])
     #ely_down_goi <- genesOfInterest    
     # locations of genes of interest in the geneUniverse set in a named vector
     geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
@@ -411,6 +424,18 @@ geneUniverse <- go_terms$qpid
 
 
 
-
+    myterms = results.table.p$GO.ID # change it to results.table.bh$GO.ID if working with BH corrected values
+    mygenes = genesInTerm(GOdata, myterms)
+    
+    var=c()
+    for (i in 1:length(myterms))
+    {
+        myterm=myterms[i]
+        mygenesforterm= mygenes[myterm][[1]]
+        mygenesforterm=paste(mygenesforterm, collapse=',')
+        var[i]=paste("GOTerm",myterm,"genes-",mygenesforterm)
+    }
+    
+    write.table(var,"genetoGOmapping.txt",sep="\t",quote=F)
 
 
