@@ -23,7 +23,7 @@ library(data.table)
 #args <- c("STR_PS", 10, path_DE_fun, datadir, resdir)
 
 ## read in command line arguments
-#args = commandArgs(trailingOnly=TRUE)
+  args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]> <path/DE_fun.R> <datadir> <resultsdir>.n", call.=FALSE)
@@ -101,6 +101,9 @@ rownames(permutations) <- NULL
 head(permutations)
 permutations
 str(nsim)
+
+permutations <- read.delim(outfile, header = TRUE, sep = "\t")
+
 
 pvalue_FC2_up <- 2*mean(permutations$FC4_up>=obs["FC2_up"])
 pvalue_FC2_down <- 2*mean(permutations$FC4_down>=obs["FC2_down"])
