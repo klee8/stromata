@@ -1,1 +1,1 @@
-E.festucae_Fl1_v3	WT_12WkP	WT_CULT
+E.festucae_Fl1_v3 CULT_WT
