@@ -360,7 +360,7 @@ shared_cluster_genes <- function(df) {
     df <- df[df$in_cluster != 0, ]
     df$shared <- lapply(df$orthogroup, function(x) sum(df$orthogroup == x))
     df$spp_groups <- lapply(df$orthogroup, function(x) paste(df[df$orthogroup == x, c("species")], collapse = ","))
-    df$group_num <- lapply(df$orthogroup, function(x) paste(df[df$orthogroup == x, c("in_cluster")], collapse = ","))
+    df$cluster_groups <- lapply(df$orthogroup, function(x) paste(df[df$orthogroup == x, c("clust_number")], collapse = ","))
     return(df)
 }
 
@@ -396,7 +396,7 @@ gds_features = gdt_features.new_set()
 
   # open file to write to 
   spp = unique(df$species)
-  write(header, paste("graph", counter, spp, "py", sep = "."))
+  write(header, paste("Rgraphs/graph", counter, spp, "py", sep = "."))
   
   # write out parameters for each gene
   for (orth in df$orthogroup) {
@@ -420,9 +420,9 @@ gds_features = gdt_features.new_set()
     if ((temp$shared !=1) && (temp$DE == 0)) { colour = "indianred"}
     if ((temp$shared !=1) && (temp$DE != 0)) { colour = "darkred"}
     line1 = paste("feature = SeqFeature(FeatureLocation(", beg, ",",  end, "), strand=", strand, ")", sep = "")
-    write(line1, paste("graph", counter, spp, "py", sep = "."), append = TRUE)
+    write(line1, paste("Rgraphs/graph", counter, spp, "py", sep = "."), append = TRUE)
     line2 = paste("gds_features.add_feature(feature, name=\"", orth, "\", label=\"True\", color=\"", colour, "\", label_size=10, label_position=\"", lab_pos ,"\", label_angle=", angle, ", sigil=\"BIGARROW\")", sep = "")
-    write(line2, paste("graph", counter, spp, "py", sep = "."), append = TRUE)
+    write(line2, paste("Rgraphs/graph", counter, spp, "py", sep = "."), append = TRUE)
   }
   
   # formatting
@@ -430,9 +430,9 @@ gds_features = gdt_features.new_set()
   clust_end = max(max(df$start), max(df$stop))
   length = (abs(clust_end - clust_start))/1000
   line3 = paste("gdd.draw(format='linear', pagesize=(", length, "*cm,4*cm), fragments=1, start=", clust_start, ", end=", clust_end, ")", sep = "")
-  write(line3, paste("graph", counter, spp, "py", sep = "."), append = TRUE)
+  write(line3, paste("Rgraphs/graph", counter, spp, "py", sep = "."), append = TRUE)
   line4 = paste("gdd.write(\"", paste( spp, "diagram", counter,"svg", sep = "."), "\", \"SVG\")", sep = "")
-  write(line4, paste("graph", counter, spp, "py", sep = "."), append = TRUE)
+  write(line4, paste("Rgraphs/graph", counter, spp, "py", sep = "."), append = TRUE)
   
   counter <<- counter + 1
 }  
@@ -440,6 +440,7 @@ gds_features = gdt_features.new_set()
 #' group df by cluster and run cluster_graph_pyscript on each one
 #' 
 make_pygraphs <- function(df) {
+  df <- df[df$in_cluster != 0, ]
   counter <<- 1
   clustdf <- shared_cluster_genes(df)
   for (clust in unique(df$in_cluster)) {
