@@ -11,14 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("UpSetR") 
 library(UpSetR)
 library(tidyverse)
+
+resdir <- ("/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_stromata_DE/3_DEseq2/")
 ```
 
 
 Take in results from setB mutant vs WT and clrD mutant vs WT
 ```{r get_data}
-elymi <- read.delim("E.elymi_NfE728/result_tables/E.elymi_NfE728_STR_PS.txt", header = TRUE, blank.lines.skip = TRUE)
-festucae <- read.delim("E.festucae_E2368/result_tables/E.festucae_E2368_STR_PS.txt", header = TRUE, blank.lines.skip = TRUE)
-typhina <- read.delim("E.typhina_E8/result_tables/E.typhina_E8_STR_PS.txt", header = TRUE, blank.lines.skip = TRUE)
+elymi <- read.delim( paste(resdir, "E.elymi_NfE728/result_tables/E.elymi_NfE728_STR_PS.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE)
+festucae <- read.delim( paste(resdir, "E.festucae_E2368/result_tables/E.festucae_E2368_STR_PS.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE)
+typhina <- read.delim( paste(resdir, "E.typhina_E8/result_tables/E.typhina_E8_STR_PS.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE)
 ```
 
 
@@ -137,7 +139,7 @@ sum(core_set$top_4FC_down)
 sum(core_set$top_2FC_up)
 sum(core_set$top_2FC_down)
 
-write.table(core_set, "STR_PS/core_set_STR_PS.txt", quote = FALSE, col.names = TRUE, row.names = FALSE)
+write.table(core_set, paste(resdir, "STR_PS/core_set_STR_PS.txt", sep = ""), quote = FALSE, col.names = TRUE, row.names = FALSE)
 
 ```
 
@@ -176,20 +178,20 @@ metadata <- as.data.frame(cbind(sets, colors))
 
 set_colors <- c(typhina_2Fold_down = "darkcyan", festucae_2Fold_down = "darkcyan",  elymi_2Fold_down = "darkcyan", typhina_4Fold_down = "darkcyan", festucae_4Fold_down = "darkcyan", elymi_4Fold_down = "darkcyan",  core_down = "darkblue", top_4FC_down = "darkblue", typhina_2Fold_up = "purple", festucae_2Fold_up = "purple", elymi_2Fold_up = "purple", typhina_4Fold_up = "purple",  festucae_4Fold_up = "purple", elymi_4Fold_up = "purple", core_up = "red", top_4FC_up = "red")    #   shade.color = colors
 
-pdf("STR_PS/UpSet_core_set_STR_PS.pdf", onefile = FALSE)
+pdf(paste(resdir, "STR_PS/UpSet_core_set_STR_PS.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("core_down", "core_up",  "top_4FC_down", "top_4FC_up"), keep.order = TRUE, order.by = "freq")
 dev.off()
 
-pdf("STR_PS/UpSet_all_FC_data_STR_PS.pdf", onefile = FALSE)
+pdf(paste(resdir, "STR_PS/UpSet_all_FC_data_STR_PS.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("typhina_2Fold_down", "festucae_2Fold_down",  "elymi_2Fold_down", "typhina_4Fold_down", "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_4FC_down", "typhina_2Fold_up", "festucae_2Fold_up", "elymi_2Fold_up", "typhina_4Fold_up",  "festucae_4Fold_up", "elymi_4Fold_up", "core_up", "top_4FC_up"), keep.order = TRUE, order.by = "freq", nintersects = 54, set.metadata = list(data = metadata, 
                           plots = list(list(type = "matrix_rows", column = "sets", colors = set_colors, alpha = 0.5))))
 dev.off()
 
-pdf("STR_PS/UpSet_all_FC_data_up_STR_PS.pdf", onefile = FALSE)
+pdf(paste(resdir, "STR_PS/UpSet_all_FC_data_up_STR_PS.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("typhina_2Fold_up", "festucae_2Fold_up", "elymi_2Fold_up", "typhina_4Fold_up",  "festucae_4Fold_up", "elymi_4Fold_up", "core_up", "top_4FC_up"), keep.order = TRUE, order.by = "freq")
 dev.off()
 
-pdf("STR_PS/UpSet_all_FC_data_down_STR_PS.pdf", onefile = FALSE)
+pdf(paste(resdir, "STR_PS/UpSet_all_FC_data_down_STR_PS.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("typhina_2Fold_down", "festucae_2Fold_down",  "elymi_2Fold_down", "typhina_4Fold_down", "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_4FC_down"), keep.order = TRUE, order.by = "freq")
 dev.off()
 ```
@@ -197,9 +199,9 @@ dev.off()
 ```{r add_annoatations}
 
 #### GET ANNOTATIONS FROM annotations.txt file from David's funannotate pipeline file
-elymi_ann <- read.delim("../0_raw_data/genome_assembly/Eel_728/Epichloe_elymi.annotations.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
-festucae_ann <- read.delim("../0_raw_data/genome_assembly/Efe_2368/Epichloe_festucae.annotations.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
-typhina_ann <- read.delim("../0_raw_data/genome_assembly/Ety_8/Epichloe_typhina_E8.annotations.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+elymi_ann <- read.delim( paste(resdir, "../0_raw_data/genome_assembly/Eel_728/Epichloe_elymi.annotations.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+festucae_ann <- read.delim( paste(resdir, "../0_raw_data/genome_assembly/Efe_2368/Epichloe_festucae.annotations.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+typhina_ann <- read.delim( paste(resdir, "../0_raw_data/genome_assembly/Ety_8/Epichloe_typhina_E8.annotations.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 
 elymi_ann$protein_length <- nchar(as.character(elymi_ann$Translation))
 festucae_ann$protein_length <- nchar(as.character(festucae_ann$Translation))
@@ -219,7 +221,7 @@ core_set <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",      
 
 str(core_set)
 
-write.table(core_set, "STR_PS/core_gene_set_STR_PS_ann.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+write.table(core_set, paste(resdir, "STR_PS/core_gene_set_STR_PS_ann.txt", sep = ""), quote = FALSE, row.names = FALSE, sep = "\t")
 
 #core_set_trans <- core_set[ , c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",  "typhina_gene_id",  "elymi_Contig", "elymi_Start", "elymi_Stop", "elymi_Strand",  "elymi_Translation", "elymi_protein_length", "festucae_Contig",  "festucae_Start", "festucae_Stop",  "festucae_Strand", "festucae_Translation", "festucae_protein_length", "typhina_Contig", "typhina_Start",  "typhina_Stop", "typhina_Strand",  "typhina_Translation", "typhina_protein_length"  )]
 
@@ -234,59 +236,59 @@ write.table(core_set, "STR_PS/core_gene_set_STR_PS_ann.txt", quote = FALSE, row.
 core_set_pann <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",       "festucae_gene_id",       "typhina_gene_id",        "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_PS_TPM",       "elymi_mean_STR_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_PS_TPM",    "festucae_mean_STR_TPM",  "typhina_apeglm_log2FC",   "typhina_apeglm_lfcSE",    "typhina_apeglm_1_svalue", "typhina_apeglm_2_svalue", "typhina_mean_PS_TPM",     "typhina_mean_STR_TPM",     "core_up",                 "core_down",               "top_4FC_up",              "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
 
 # add SignalP annotations
-signalP <- read.delim("../SignalP/E.elymi_NfE728_signalP.txt", header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+signalP <- read.delim( paste(resdir, "../SignalP/E.elymi_NfE728_signalP.txt", sep = ""),  header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(signalP) <- c("gene_id", "Pr_signalP", "sigP_pos", "sigP_clev", "Pr_sigP_clev")
 signalP$gene_id <- gsub("-T1", "", signalP$gene_id)
 colnames(signalP) <- paste("el", colnames(signalP), sep = "_")
 core_set_pann <- merge(core_set_pann, signalP, by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-signalP <- read.delim("../SignalP/E.festucae_E2368_signalP.txt", header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+signalP <- read.delim( paste(resdir, "../SignalP/E.festucae_E2368_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(signalP) <- c("gene_id", "Pr_signalP", "sigP_pos", "sigP_clev", "Pr_sigP_clev")
 signalP$gene_id <- gsub("-T1", "", signalP$gene_id)
 colnames(signalP) <- paste("fe", colnames(signalP), sep = "_")
 core_set_pann <- merge(core_set_pann, signalP, by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
-signalP <- read.delim("../SignalP/E.typhina_E8_signalP.txt", header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+signalP <- read.delim( paste(resdir, "../SignalP/E.typhina_E8_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(signalP) <- c("gene_id", "Pr_signalP", "sigP_pos", "sigP_clev", "Pr_sigP_clev")
 signalP$gene_id <- gsub("-T1", "", signalP$gene_id)
 colnames(signalP) <- paste("ty", colnames(signalP), sep = "_")
 core_set_pann <- merge(core_set_pann, signalP, by.x = "typhina_gene_id", by.y = "ty_gene_id", all = TRUE)
 
 # add EffectorP annotations
-effectorP <- read.delim("../EffectorP/E.elymi_NfE728_effectorP.txt", header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+effectorP <- read.delim( paste(resdir, "../EffectorP/E.elymi_NfE728_effectorP.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(effectorP) <- c("gene_id", "effectorP", "efP_Pr")
 effectorP$gene_id <- gsub("-T1.*", "", effectorP$gene_id)
 colnames(effectorP) <- paste("el", colnames(effectorP), sep = "_")
 core_set_pann <- merge(core_set_pann, effectorP,  by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-effectorP <- read.delim("../EffectorP/E.festucae_E2368_effectorP.txt", header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+effectorP <- read.delim( paste(resdir, "../EffectorP/E.festucae_E2368_effectorP.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(effectorP) <- c("gene_id", "effectorP", "efP_Pr")
 effectorP$gene_id <- gsub("-T1.*", "", effectorP$gene_id)
 colnames(effectorP) <- paste("fe", colnames(effectorP), sep = "_")
 core_set_pann <- merge(core_set_pann, effectorP,  by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
-effectorP <- read.delim("../EffectorP/E.typhina_E8_effectorP.txt", header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+effectorP <- read.delim( paste(resdir, "../EffectorP/E.typhina_E8_effectorP.txt", sep = "") , header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(effectorP) <- c("gene_id", "effectorP", "efP_Pr")
 effectorP$gene_id <- gsub("-T1.*", "", effectorP$gene_id)
 colnames(effectorP) <- paste("ty", colnames(effectorP), sep = "_")
 core_set_pann <- merge(core_set_pann, effectorP, by.x = "typhina_gene_id", by.y = "ty_gene_id", all = TRUE)
 
 # add PANNZER DE annoations
-pannzer <- read.delim("../Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_DE.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+pannzer <- read.delim( paste(resdir, "../Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_DE.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 pannzer$gene_id <- gsub("-T1", "", pannzer$qpid)
 pan_keep <- pannzer[, c("gene_id", "desc", "genename")]
 colnames(pan_keep) <- c("gene_id", "pannzer_desc", "pannzer_genename")
 colnames(pan_keep) <- paste("el", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-pannzer <- read.delim("../Pannzer/E.festucae_E2368/E.festucae_E2368_pannzer_DE.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+pannzer <- read.delim( paste(resdir, "../Pannzer/E.festucae_E2368/E.festucae_E2368_pannzer_DE.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 pannzer$gene_id <- gsub("-T1", "", pannzer$qpid)
 pan_keep <- pannzer[, c("gene_id", "desc", "genename")]
 colnames(pan_keep) <- c("gene_id", "pannzer_desc", "pannzer_genename")
 colnames(pan_keep) <- paste("fe", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
-pannzer <- read.delim("../Pannzer/E.typhina_E8/E.typhina_E8_pannzer_DE.txt", header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+pannzer <- read.delim( paste(resdir, "../Pannzer/E.typhina_E8/E.typhina_E8_pannzer_DE.txt", sep = "") , header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 pannzer$gene_id <- gsub("-T1", "", pannzer$qpid)
 pan_keep <- pannzer[, c("gene_id", "desc", "genename")]
 colnames(pan_keep) <- c("gene_id", "pannzer_desc", "pannzer_genename")
@@ -294,7 +296,7 @@ colnames(pan_keep) <- paste("ty", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "typhina_gene_id", by.y = "ty_gene_id", all = TRUE)
 
 # add M3 set ortholog numbers
-#m3 <- read.delim("lookup_ortholog_groups.txt", header = TRUE, sep = "\t")
+#m3 <- read.delim( paste(resdir, "lookup_ortholog_groups.txt", sep = "") , header = TRUE, sep = "\t")
 #m3 <- m3[, c("orthogroup", "m3")]
 #core_set_pann <- merge(core_set_pann, m3, by.x = "ortho_group", by.y = "orthogroup", all = FALSE)
 
@@ -305,8 +307,8 @@ colnames(core_set_pann)
 core_set_pann <- core_set_pann[, c("orthogroup", "num_spp", "m3", "elymi_gene_id", "festucae_gene_id", "typhina_gene_id", "elymi_apeglm_log2FC", "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",  "elymi_apeglm_2_svalue",  "elymi_mean_PS_TPM", "elymi_mean_STR_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", "festucae_apeglm_1_svalue","festucae_apeglm_2_svalue","festucae_mean_PS_TPM",  "festucae_mean_STR_TPM",  "typhina_apeglm_log2FC",  "typhina_apeglm_lfcSE",  "typhina_apeglm_1_svalue", "typhina_apeglm_2_svalue", "typhina_mean_PS_TPM", "typhina_mean_STR_TPM",  "core_up", "core_down",  "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down", "el_Pr_signalP", "el_sigP_pos", "el_sigP_clev", "el_Pr_sigP_clev",  "fe_Pr_signalP", "fe_sigP_pos", "fe_sigP_clev", "fe_Pr_sigP_clev",  "ty_Pr_signalP", "ty_sigP_pos", "ty_sigP_clev", "ty_Pr_sigP_clev", "el_effectorP", "el_efP_Pr",  "fe_effectorP", "fe_efP_Pr",  "ty_effectorP", "ty_efP_Pr",  "el_pannzer_desc", "el_pannzer_genename", "fe_pannzer_desc",  "fe_pannzer_genename", "ty_pannzer_desc",  "ty_pannzer_genename")]
 
 
-write.table(core_set_pann, "STR_PS/core_gene_set_STR_PS_pannzer.txt", quote = FALSE, row.names = FALSE, sep = "\t")
-```
+write.table(core_set_pann, paste(resdir, "STR_PS/core_gene_set_STR_PS_pannzer.txt", sep = ""), quote = FALSE, row.names = FALSE, sep = "\t")
+  ```
 
 
 ##### ARCHIVED
