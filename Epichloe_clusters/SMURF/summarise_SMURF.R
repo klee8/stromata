@@ -1,9 +1,10 @@
 # Kate Lee 2019
 
+# Note: ortholog flat file created with proteinortho5 using m3, fl1, elymi, festucae and typhina Epichloe protein sets.
 
 ### Set defaults
-resdir <- "/media/kate/Massey_linux_onl/projects/STROMATA/results/Epichloe_clusters/SMURF/"
-ortho <- "/media/kate/Massey_linux_onl/projects/data/gene_model_sets/proteinortho/flat_ortho_file.txt"
+resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/SMURF/"
+ortho <- "/media/kate/Massey_linux_onl/projects/data/gene_model_sets/proteinortho/proteinortho_with_fl1_and_m3/flat_ortho_file.txt"
 
 ### Read in command line arguments
 args = commandArgs(trailingOnly=TRUE)
