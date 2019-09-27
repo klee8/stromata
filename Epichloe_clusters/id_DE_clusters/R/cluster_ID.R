@@ -9,26 +9,26 @@ library(data.table)
 ###############################################################
 #           GET FILENAMES AND NUMBER OF SIMULATIONS NEEDED
 ###############################################################
-basefilename <- "STR_PS"
-nsim <- 10000
-functionfile <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/cluster_fun.R"
-datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
-resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS"
-args <- c(basefilename, nsim, functionfile, datadir, resdir)
-setwd(resdir)
+
+# TESTRUNS:
+#basefilename <- "STR_PS"
+#functionfile <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/cluster_fun.R"
+#datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
+#resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS"
+#args <- c(basefilename, functionfile, datadir, resdir)
+#setwd(resdir)
 
 
-#args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly=TRUE)
 dir.create("cluster_perm_results")
 
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
 } else {
   basefilename <- args[1]
-  nsim <- as.numeric(args[2])
-  functionfile <- args[3]
-  datadir <- args[4]
-  resdir <- args[5]
+  functionfile <- args[2]
+  datadir <- args[3]
+  resdir <- args[4]
   infile = paste(datadir, "core_genes_", args[1], "_rfmt.txt", sep = "")
   cluster_res_file = paste("cluster_perm_results/", basefilename, "_cluster_results.txt", sep = "")
   gene_res_file = paste("cluster_perm_results/", basefilename, "_per_gene_cluster_results.txt", sep = "")
@@ -36,7 +36,7 @@ if (length(args)<1) {
   sum_perm_file = paste("cluster_perm_results/", basefilename, "_permuted_cluster_summary.txt", sep = "")
   graphout_file = paste("cluster_perm_results/", basefilename, "_permuted_DE_clusters.pdf", sep = "")
 }
-checks <- c(basefilename, nsim, functionfile, datadir, resdir)
+checks <- c(basefilename, functionfile, datadir, resdir)
 print(checks)
 
 #setwd(paste(resdir, basefilename, sep = ""))
@@ -73,5 +73,5 @@ df <- shared_cluster_genes(df)
 write.table(data.frame(df), gene_res_file, row.names = FALSE, quote = FALSE, sep = "\t")
 
 # write out python scripts to graph clusters
-dir.create("Rgraphs")
+dir.create("cluster_perm_results/Rgraphs")
 make_pygraphs(df)

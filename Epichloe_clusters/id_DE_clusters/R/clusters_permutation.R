@@ -69,7 +69,7 @@ obs_clusters <- nrow(clusters)
 df <- shared_cluster_genes(df)
 
 # write out python scripts to graph clusters
-dir.create("Rgraphs")
+dir.create("cluster_perm_results/Rgraphs")
 make_pygraphs(df)
 
 # run permutation function with foreach parellisation

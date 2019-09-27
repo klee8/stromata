@@ -1,6 +1,5 @@
 
 
-
 #' add column which sets DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005
 #' Requires a dataframe with log2fc output (e.g. from DESeq) per gene
 DE_categories <- function(data) {
