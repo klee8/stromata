@@ -1,45 +1,40 @@
-## Identify core gene sets and potential secondary metabolite clusters in differentially expressed data
+## Identify shared DE genes and co-regulated gene clusters in differentially expressed data
 
-#### Kate Lee July 2019
+#### Kate Lee 2019
 
 
-### AIM:
+### Aim:
 Identify core set of genes that are differentially expressed (DE) in stromata versus stem
 Identify clusters of DE genes that are shared between species.
 
-### RUN:
+### Run:
     bash run_reformat_core_gene_set.sh 
-    bash run_id_clusters.sh
-    bash run_de_and_cluster_permutations.sh
+    bash run_DE_permutations.sh       # permutes foldchange results within specices and checks for core gene sets
+    bash run_cluster_ID.sh            # outputs clusters and python graph scripts
+    bash run_cluster_permutations.sh  # same as run_cluster_ID.sh with permutations also
 
 ### Reformatting:
 Input has columns for each gene in analysis (reformatted using reformat_core_gene_set.Rmd):  
 "contig", "start", "stop", "gene_id","orthogroup", "log2fc", "lfcSE", "svalue_1", "svalue_2", "species"
 
-### ID clusters
-perl id_DE_clusters.pl <reformated_core_gene_set_file> > log.txt
+### shared DE genes
+Number of DE genes shared between all species 
+- 'top_2FC' : >= 2-fold-change in all species
+- 'top_4FC' : >= 4-fold-change in all speices### Identify clusters:
+- 'core_genes' : at least 2-fold-change in all species at least 4-fold-change in one species* Number of clusters found in each species
 
-#### WORKFLOW
-* Iterates by contig and gene postion through differential expression output from core gene DE analysis (rows for each gene on each species). 
-    * Identifies genes that could initiate or extend a cluster based on their fold change and svalues
-* Iterates through DE values a second time. 
-    * Initiates clusters where there is a gene that could initiate or extend
-    * Allows for a given number of gaps
-    * Evaluates potential cluster when the direction of differential expression changes, or the allowed number of gaps is exceeded, or the contig changes.
-    * Trailing gaps are trimmed off (gaps are only allowed within the cluster 
-    * Cluster must have a minimum number of genes 
-    * If all requirements are met, cluster is recored
-* Iterates through clusters to find any that are linked across species
-    * For each ortholog in the cluster, checks its presence in clusters in other species
-    * For each ortholog not in original cluster, but present in other species, checks for more linked clusters
-    * (On the off chance that clusters from the same species are linked across two contigs by clusters in other species, make a third pass with any unchecked orthologs).
-    * Writes out table of clusters identified
-* Iterates through groups of clusters
-    * identifies shared orthologs
-    * writes table of cluster groups with flat file (i.e. one row for each species and ortholog) 
-    * Writes python script to graphs cluster with added annotation to show end of contigs, gaps and shared orthologs using biopython.
+### Co-regulated gene clusters 
+- consecutive genes with >= 2-fold-change DE
+- either 3 genes in a row, or more than three genes with one gap.
 
-### PERMUTATION TESTS 
+### Permutation tests
 R scripts which randomise DE values among genes for each species and then test for 
-    * Number of DE genes shared between species
-    * Number of clusters found in each species
+- shared DE genes
+- co-regulated gene clusters
+
+
+
+
+    
+    
+    
