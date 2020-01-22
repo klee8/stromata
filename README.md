@@ -35,7 +35,7 @@
     - Quant-map against Epichloe gene sets from David Winter.
 - 3_DESeq2  
     - take in quant counts and find differentially expressed genes with DEseq2
-    - output a list of genes expressed log2foldchange > 2 and svalue < 0.0005, with their positions (from gff3)
+    - output a list of genes expressed log2foldchange > 1 and svalue < 0.0005, with their positions (from gff3)
     - add annotations from pannzer, SignalP, EffectorP 
     - add annotations from David Winters funnanotate pipeline for Epichloe.
     - identify core genes found in more than one species
@@ -50,6 +50,3 @@ Same as above for Epichloe DE but uses the Lolium perenne gene set from Dupont e
 #### Plant vs culture DE
 Same DE pipeline as above, but using the plant and culture data from Dupont et al., (2015).
 
-#### Future work
-- bwa alignment of genomes against more complete genome to see if some segments are near enough to have genes from the same cluster
-- use occultercut to identify AT rich (i.e. most likely repeat regions) to look for clusters that have been split up by repeat regions
