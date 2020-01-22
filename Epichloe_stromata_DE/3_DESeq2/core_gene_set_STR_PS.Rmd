@@ -194,6 +194,12 @@ dev.off()
 pdf(paste(resdir, "STR_PS/UpSet_all_FC_data_down_STR_PS.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("typhina_2Fold_down", "festucae_2Fold_down",  "elymi_2Fold_down", "typhina_4Fold_down", "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_4FC_down"), keep.order = TRUE, order.by = "freq")
 dev.off()
+
+pdf(paste(resdir, "STR_PS/UpSet_2FC_data_STR_PS.pdf", sep = ""), onefile = FALSE)
+upset(fromList(listInput), sets = c("typhina_2Fold_down", "festucae_2Fold_down",  "elymi_2Fold_down", "top_2FC_down","typhina_2Fold_up", "festucae_2Fold_up", "elymi_2Fold_up","top_2FC_up"), keep.order = TRUE, order.by = "freq", nintersects = 54, set.metadata = list(data = metadata, 
+                          plots = list(list(type = "matrix_rows", column = "sets", colors = set_colors, alpha = 0.5))))
+dev.off()
+
 ```
 
 ```{r add_annoatations}

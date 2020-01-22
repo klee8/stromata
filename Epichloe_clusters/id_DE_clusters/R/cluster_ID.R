@@ -1,7 +1,6 @@
 # randomise DE and see if you can still identify clusters
 
 #install.packages("doParallel")
-library(doParallel)
 library(tidyverse)
 library(data.table)
 
@@ -11,16 +10,16 @@ library(data.table)
 ###############################################################
 
 # TESTRUNS:
-#basefilename <- "STR_PS"
-#functionfile <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/cluster_fun.R"
-#datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
-#resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS"
-#args <- c(basefilename, functionfile, datadir, resdir)
-#setwd(resdir)
+basefilename <- "STR_PS"
+functionfile <- "/media/kate/Massey_linux_onl/projects/stromata_analysis/Epichloe_clusters/id_DE_clusters/R/cluster_fun.R"
+datadir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/rfmt_core_gene_sets/"
+resdir <- "/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/id_DE_clusters/STR_PS"
+args <- c(basefilename, functionfile, datadir, resdir)
+setwd(resdir)
 
 
-args = commandArgs(trailingOnly=TRUE)
-dir.create("cluster_perm_results")
+#args = commandArgs(trailingOnly=TRUE)
+#dir.create("cluster_perm_results")
 
 if (length(args)<1) {
   stop("At least one argument must be supplied: <base_filename>, <number of simulations [default = 10,000]>.n", call.=FALSE)
@@ -48,7 +47,7 @@ df <- read.delim(infile, header = TRUE, sep = "\t")
 # setup data to find clusters (order by contig and position, rm duplicates,
 # bin DE into 0, 1 (>=2fold), 2 (>=4fold), identify groups of consecutive
 # genes on the same contig with the same direction of fold change)
-#total_groups <- 0
+# total_groups <- 0
 df <- setup_cluster_assessment(df)
 
 # identify clusters, and list the genes/orthologs in them
@@ -57,6 +56,8 @@ clusters <- find_assessment_blocks_with_clusters(df)
 # put cluster information back into main data frame
 df <- genes_in_clusters(df, clusters)
 #head(df[df$clust_len != 0,])
+
+write.table(df, "all_genes_cluster_annotated.txt", quote = FALSE, row.names = FALSE)
 
 # use cluster-annotated df to summarise cluster information
 cluster_sum <- sum_clusters(df)
@@ -69,9 +70,25 @@ obs_clusters <- nrow(clusters)
 # check for shared genes among clusters
 df <- shared_cluster_genes(df)
 
+# add SMURF backbone data
+smurf_bkbone <- read.delim("/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_clusters/SMURF/SMURF_flat_results_by_orthologs.txt")
+smurf <- smurf_bkbone[, c("ortho_group", "el_SMURF_backbone_gene_prediction", "fes_SMURF_backbone_gene_prediction", "typ_SMURF_backbone_gene_prediction")]
+smurf <- smurf[!is.na(smurf$el_SMURF_backbone_gene_prediction) | !is.na(smurf$fes_SMURF_backbone_gene_prediction) | !is.na(smurf$typ_SMURF_backbone_gene_prediction),]
+smurf$bkbone <- paste(smurf$el_SMURF_backbone_gene_prediction, smurf$fes_SMURF_backbone_gene_prediction, smurf$typ_SMURF_backbone_gene_prediction, sep = ",")
+smurf$bkbone <- gsub( "NA,", "", smurf$bkbone)
+smurf$bkbone <- gsub( ",NA", "", smurf$bkbone)
+smurf$bkbone <- as.factor(smurf$bkbone)
+smurf <- smurf[!is.na(smurf$bkbone),]
+smurf$bkbone <- as.factor(smurf$bkbone)
+smurf$ortho_group <- factor(smurf$ortho_group, levels=levels(df$orthogroup)) 
+
+df$smurf_bk <- sapply(df$orthogroup, function(x) ifelse(x %in% smurf$ortho_group, smurf[smurf$ortho_group == x, c("bkbone")], NA))
+temp <- smurf$bkbone[df$smurf_bk] 
+df$smurf_bk <- temp
+df
 # write out per-gene results data frame
 write.table(data.frame(df), gene_res_file, row.names = FALSE, quote = FALSE, sep = "\t")
 
-# write out python scripts to graph clusters
+  # write out python scripts to graph clusters
 dir.create("cluster_perm_results/Rgraphs")
 make_pygraphs(df)

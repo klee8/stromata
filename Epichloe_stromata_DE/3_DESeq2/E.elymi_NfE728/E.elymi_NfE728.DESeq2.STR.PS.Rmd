@@ -74,6 +74,7 @@ names(files) <- samples$run
 
 tx2gene <- read.table(file.path(dir, "transcriptome/E.elymi_NfE728/transcriptome.headers.txt"))
 colnames(tx2gene) <- c("TXNAME", "GENEID")
+files
 ```
 
 
@@ -81,7 +82,8 @@ colnames(tx2gene) <- c("TXNAME", "GENEID")
 
 txi <- tximport(files, type="salmon", tx2gene=tx2gene, abundanceCol = "TPM")
 ```
-
+Transcripts Per Million (TPM) is a normalization method for RNA-seq, should be read as "for every 1,000,000 RNA molecules in the RNA-seq sample, x came from this gene/transcript."  ~ ArrayServer.com
+Here Salmon has calcuated TPM for each sample
 ```{r get_Salmon_TPM_abundance}
 
 # general solution, get list of samples for each condition
@@ -115,7 +117,7 @@ dds <- collapseReplicates(dds, groupby = samples$sample, run = samples$run, rena
 
 #Initial data exploratory analysis
 
-Use regularized-logarithm transformation or rlog (Love, Huber, and Anders 2014) to normalise raw data prior to createing PCA and checking sample distance. An alternative transformation is vst, which is faster)
+Use regularized-logarithm transformation or rlog (Love, Huber, and Anders 2014) to normalise raw data prior to creating PCA and checking sample distance. An alternative transformation is vst, which is faster)
 specified blind = FALSE, which means that differences between cell lines and treatment (the variables in the design) will not contribute to the expected variance-mean trend of the experiment.
 Don't use this transform in the DESeq analysis this because For differential testing the DESeq function applied to raw counts is recommended
 
@@ -206,7 +208,7 @@ while (!is.null(dev.list()))  dev.off()
 
 #Run DESeq algorithm
 
-If you never tell the DESeq2 functions which level you want to compare against (e.g. which level represents the control group), the comparisons will be based on the alphabetical order of the levels. Here just set the reference condition to wild type
+If you never tell the DESeq2 functions which level you want to compare against (e.g. which level represents the control group), the comparisons will be based on the alphabetical order of the levels. Here just set the reference condition to stem
 ```{r set_ref_condition}
 
 dds$condition <- relevel(dds$condition, ref = "PS")

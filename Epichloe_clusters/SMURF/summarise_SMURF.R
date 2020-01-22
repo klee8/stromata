@@ -17,7 +17,7 @@ if (length(args) > 0) {
 
 
 # read in ortholog flat file
-orth <- read.delim(ortho, sep = " ", header = TRUE)
+orth <- read.delim(ortho, sep = "\t", header = TRUE)
 orth$spp <- NULL
 
 # get SMURF secondary metabolite clusters
@@ -49,6 +49,8 @@ colnames(ely) <- paste("el", colnames(ely), sep = "_")
 colnames(fes) <- paste("fes", colnames(fes), sep = "_")
 colnames(typ) <- paste("typ", colnames(typ), sep = "_")
 
+head(ely)
+head(orth)
 # add in ortholog numbers
 ely <- merge(ely, orth, by.x = "el_Gene_id", by.y = "gene_id")
 fes <- merge(fes, orth, by.x = "fes_Gene_id", by.y = "gene_id")
