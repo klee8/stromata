@@ -27,7 +27,6 @@ source(paste(scriptdir, "topGO_fun.R", sep = "" ))
 DE_all <- read.delim("../../3_DEseq2/STR_PS/core_gene_set_STR_PS_ann.txt", header = TRUE)
 
 
-
 #####     FESTUCAE
 
 # read in pannzer annotations and put into topGO datastructure geneID2GO
