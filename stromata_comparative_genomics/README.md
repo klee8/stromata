@@ -6,9 +6,9 @@
 
 ### Workflow
 
-Get genes sets from each of the genomes with MAKER (or first step of funnannotate)
-Use proteinortho5 to identify orthologs
-graph presence of stromata genes in each spp
++ Get genes sets from each of the genomes with MAKER (or first step of funnannotate)
++ Use proteinortho5 to identify orthologs
++ Graph presence of stromata genes in each spp
 
 
 
