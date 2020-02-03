@@ -2,7 +2,7 @@
 
 ### AIM: look for presence of core genes from stromata DE analysis in a range of sexual and asexual Epichloe genomes
 
-### DATA: data from Schardl lab, Young lab, Cox and Scott labs
+### DATA: data from Schardl, Young, Cox and Scott labs
 
 ### Workflow
 
