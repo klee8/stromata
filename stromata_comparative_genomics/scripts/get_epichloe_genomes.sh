@@ -60,17 +60,20 @@ mv	GCA_002319005.1_ASM231900v1_genomic.fna	data/E.bromicola_E7626.fa
 
 
 
-
+##### NOTE : background on genomes
 #E. amarillans		E57	sexual		Schardl et al. 2013		PRJNA67301 AFRF00000000.1
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/AF/RF/AFRF01/AFRF01.1.fsa_nt.gz"
 #		E4668	sexual		Kentucky data base JFGZ00000000.1
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/JF/GZ/JFGZ01/JFGZ01.1.fsa_nt.gz"
+
+#E. aotearoae		E899	asexual		Kentucky data base
+
 #E. baconii		E1031	sexual		Kentucky data base JFGY00000000.1
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/JF/GY/JFGY01/JFGY01.1.fsa_nt.gz"
 
-
 #E. brachyelytri		E4804	sexual		Schardl et al. 2013		PRJNA67245
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/AF/RB/AFRB01/AFRB01.1.fsa_nt.gz"
+
 #E. bromicola		E7561/AL0426/2	sexual		Kentucky database PRJNA274992
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/LB/NH/LBNH01/LBNH01.1.fsa_nt.gz"
 #		ALO434	sexual		Kentucky database  	PRJNA274994
@@ -80,20 +83,18 @@ mv	GCA_002319005.1_ASM231900v1_genomic.fna	data/E.bromicola_E7626.fa
 
 #E. elymi		E56	sexual		Schardl et al. 2013		PRJNA173776
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/AM/DJ/AMDJ01/AMDJ01.1.fsa_nt.gz"
-#		E757	sexual		Scott unpublished		SAMN07182378                        <<<<<<<<<<<
-#		E6255/NFE728	sexual                                                    <<<<<<<<<<<
+#		E757	sexual		Scott unpublished		SAMN07182378                        
+#		E6255/NFE728	sexual                                                          <<<<<<<<<<< Don't have this one
 
 #E. festucae		E2368	sexual		Schardl et al. 2013		PRJNA42133
 #wget "ftp://ftp.ncbi.nlm.nih.gov/sra/wgs_aux/AD/FL/ADFL02/ADFL02.1.fsa_nt.gz"
 #		Fl1	sexual		Schardl et al. 2013		PRJNA51625
 #		Fg1	sexual		Scott unpublished		SAMN06710538
 
-#E. festucae var lolii		AR37	asexual		Cropmark
-#		E142	asexual		Cropmark
-#		AR5	asexual		Cox et al. 2014
+#E. festucae var lolii		AR37	asexual		Agresearch                              <<<<<<<<<<< Get from Agresearch                      
+#		AR5	asexual		Agresearch
 #		AR48	asexual		AgResearch
 #		AR1	asexual		AgResearch
-#		AR37	asexual		AgResearch
 
 #E. glyceriae		E277	sexual		Schardl et al. 2013		PRJNA67247
 #		E2772	sexual		Schardl et al. 2013
@@ -105,8 +106,6 @@ mv	GCA_002319005.1_ASM231900v1_genomic.fna	data/E.bromicola_E7626.fa
 #E. typhina		E8	sexual		Schardl et al. 2013		PRJNA174036
 
 #E. typhina spp. Poae		E5819	sexual		Schardl et al. 2013		PRJNA68441
-
-#E. aotearoae		E899	asexual		Kentucky data base
 
 #E. inebrians		E818	asexual		Schardl et al. 2013		PRJNA174039
 #E. gansuensis		E7080	asexual		Schardl et al. 2013		PRJNA67299
