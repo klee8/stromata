@@ -269,17 +269,15 @@ goi <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_sva
 
 write.table(goi, "result_tables/E.elymi_NfE728_INF_PS.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
-2FConly <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_svalue, mean_PS_TPM, mean_INF_TPM)
-
 # identify significant DE
+targets_up <-  rownames(subset(all_results,(apeglm_2_svalue <.005 & apeglm_log2FC >= 1 ))) 
+all_results$up_2FC <- ifelse(rownames(all_results) %in% targets_up, 1, 0)
+targets_down <-  rownames(subset(all_results,(apeglm_2_svalue <.005 & apeglm_log2FC <= -1 )))
+all_results$down_2FC <- ifelse(rownames(all_results) %in% targets_down, 1, 0)
 
+sub_2FC <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_svalue, mean_PS_TPM, mean_INF_TPM, up_2FC, down_2FC)
 
-
-
-
-
-
-
+write.table(sub_2FC, "result_tables/E.elymi_NfE728_INF_PS_2FC.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
 
 
