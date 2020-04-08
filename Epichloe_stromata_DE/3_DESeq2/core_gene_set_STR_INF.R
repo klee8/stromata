@@ -5,24 +5,24 @@ date: "10 April 2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+# setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #install.packages("tidyverse")
 library("tidyverse")
 
 resdir <- ("/media/kate/Massey_linux_onl/projects/results/stromata/Epichloe_stromata_DE/3_DEseq2/")
-```
+
 
 
 Take in results from setB mutant vs WT and clrD mutant vs WT
-```{r get_data}
+# get_data}
 elymi <- read.delim(paste(resdir, "E.elymi_NfE728/result_tables/E.elymi_NfE728_STR_INF.txt", sep = ""), header = TRUE)
 festucae <- read.delim(paste(resdir, "E.festucae_E2368/result_tables/E.festucae_E2368_STR_INF.txt", sep = ""), header = TRUE)
 head(elymi)
-```
 
 
-```{r subset_apeglm_results}
+
+# subset_apeglm_results}
 #keep <- c("gene_id","STR_fpkm", "INF_fpkm", "apeglm_log2FC", "apeglm_1_lfcSE",  "apeglm_1_svalue", "apeglm_log2FC", "apeglm_2_lfcSE", "apeglm_2_svalue")
 keep <- c("gene_id", "apeglm_log2FC", "apeglm_lfcSE", "apeglm_1_svalue", "apeglm_2_svalue", "mean_STR_TPM", "mean_INF_TPM")
 elymi <- elymi[, keep]
@@ -31,10 +31,10 @@ festucae <- festucae[, keep]
 # set colnames for each set of results
 colnames(elymi) <- paste("elymi", colnames(elymi), sep = "_")
 colnames(festucae) <- paste("festucae", colnames(festucae), sep = "_")
-```
 
 
-```{r rename_genes_by_ortholog_names}
+
+# rename_genes_by_ortholog_names}
 
 
 orthology <- read.delim("flat_ortho_file.txt", header = TRUE)
@@ -44,10 +44,10 @@ orthology$gene_id <- gsub("-T1", "", orthology$gene_id)
 elymi <- merge(elymi, orthology[, c("ortho_group",  "gene_id")], by.x = "elymi_gene_id", by.y = "gene_id")
 festucae <- merge(festucae, orthology[, c("ortho_group",  "gene_id")], by.x = "festucae_gene_id", by.y = "gene_id")
 
-```
 
 
-```{r merge_data}
+
+# merge_data}
 
 # merge result tables
 core_set <- merge(elymi, festucae, by = "ortho_group", all = TRUE)
@@ -65,10 +65,10 @@ core_set <- merge(core_set, m3, by.x = "orthogroup", by.y = "orthogroup", all = 
 rownames(core_set) <- core_set$group
 colnames(core_set)
 str(core_set)
-```
 
 
-```{r flag_apeglm_normalised_log2FC}
+
+# flag_apeglm_normalised_log2FC}
 
 ##### CORE: flag if up by 4fold in one data set and by up by at least 2 fold in the other two
 targets_up <-  rownames(subset(core_set, ( ((elymi_apeglm_2_svalue <.005 & elymi_apeglm_log2FC >= 2 ) 
@@ -119,11 +119,11 @@ sum(core_set$top_2FC_down)
 
 write.table(core_set, paste(resdir, "STR_INF/core_set_STR_INF.txt", sep = ""), quote = FALSE, col.names = TRUE, row.names = FALSE)
 
-```
+
 
 
 # Graph overlaps with UpSetR package
-```{r UpSet_diagram_apeglm_normalised_results}
+# UpSet_diagram_apeglm_normalised_results}
 #install.packages("UpSetR")
 library(UpSetR)
 
@@ -170,10 +170,10 @@ dev.off()
 pdf(paste(resdir, "STR_INF/UpSet_all_FC_data_down_STR_INF.pdf", sep = ""), onefile = FALSE)
 upset(fromList(listInput), sets = c("festucae_2Fold_down",  "elymi_2Fold_down",  "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_down"), keep.order = TRUE, order.by = "freq")
 dev.off()
-```
 
 
-```{r add_annoatations}
+
+# add_annoatations}
 
 #### GET ANNOTATIONS FROM annotations.txt file from David's funannotate pipeline file
 elymi_ann <- read.delim(paste(resdir, "../0_raw_data/genome_assembly/Eel_728/Epichloe_elymi.annotations.txt", sep = ""), header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
@@ -209,9 +209,9 @@ write.table(core_set, paste(resdir, "STR_INF/core_gene_set_STR_INF_ann.txt", sep
 #str(core_set)
 #str(core_set_ann)
 #str(core_set_trans)
-```
 
-```{r pannzer_ann}
+
+# pannzer_ann}
 
 core_set_pann <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",       "festucae_gene_id",     "elymi_apeglm_log2FC",     "elymi_apeglm_lfcSE",   "elymi_apeglm_1_svalue",   "elymi_apeglm_2_svalue",   "elymi_mean_STR_TPM",       "elymi_mean_INF_TPM",      "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue", "festucae_mean_STR_TPM",    "festucae_mean_INF_TPM",  "core_up",  "core_down", "top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down")]      
 
@@ -270,11 +270,11 @@ core_set_pann <- core_set_pann[, c( "orthogroup", "num_spp","m3", "elymi_gene_id
 
 write.table(core_set_pann, paste(resdir, "STR_INF/core_gene_set_STR_INF_pannzer.txt", sep = ""), quote = FALSE, row.names = FALSE, sep = "\t")
 
-```
+
 
 ##### ARCHIVED
 
-```{r flag_genes_of_interest, eval=FALSE, include=FALSE}
+# flag_genes_of_interest, eval=FALSE, include=FALSE}
 
 # flag presence in both data sets
 targets <- rownames(subset(core_set, (setB_padj<.01 & setB_log2FC >= 1 & clrD_padj<.01 & clrD_log2FC >= 1 & !is.na(setB_log2FC) & !is.na(clrD_log2FC) )))
@@ -291,10 +291,10 @@ core_set$core_log2FC_2_down <- ifelse(rownames(core_set) %in% targets, 1, 0)
 #colnames(core_set)
 #core_set[, c("gene_id", "setB_baseMean", "setB_log2FC", "setB_padj", "setB_log2FC_1", "setB_log2FC_2", "clrD_log2FC",  "clrD_padj", "clrD_log2FC_1", "clrD_log2FC_2", "core_log2FC_1_up", "core_log2FC_2_up", "core_log2FC_1_down", "core_log2FC_2_down")]
 #core_set[is.na(core_set$setB_log2FC), c("gene_id",  "setB_log2FC", "setB_log2FC_1", "setB_log2FC_2", "clrD_log2FC",  "clrD_log2FC_1", "clrD_log2FC_2", "core_log2FC_1_up", "core_log2FC_2_up", "core_log2FC_1_down", "core_log2FC_2_down")]
-```
+
 
 # Graph overlaps with UpSetR package
-```{r UpSet_diagram_raw_DESeq, eval=FALSE, include=FALSE}
+# UpSet_diagram_raw_DESeq, eval=FALSE, include=FALSE}
 #install.packages("UpSetR")
 library(UpSetR)
 
@@ -324,4 +324,3 @@ jpeg("plots/UpSet_all_FC_data.jpeg")
 upset(fromList(listInput), sets = c("setB_2Fold_down", "setB_4Fold_down", "clrD_2Fold_down", "clrD_4Fold_down", "core_2Fold_down", "core_4Fold_down", "setB_2Fold_up", "setB_4Fold_up", "clrD_2Fold_up", "clrD_4Fold_up", "core_2Fold_up", "core_4Fold_up"), keep.order = TRUE, order.by = "freq")
 dev.off()
 
-```

@@ -10,7 +10,7 @@ rm_dup_rows <- function(df) {
   return(df)
 } 
 
-#' set DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005
+#' set DE at 1 for log2FC >= 1 and svalue <= 0.005, set DE at 2 for log2FC >= 2 and svalue <= 0.005   <<<< relaxed to be svalue <=0.01
 #' 
 bin_DE <- function(df) { 
   df <- df %>% mutate(DE = ifelse(((log2fc >= 2) | (log2fc <= -2)) & (svalue_1 <= 0.005), 2,

@@ -14,7 +14,8 @@
 #BiocManager::install("pheatmap", version = "3.9")
 #BiocManager::install("RColorBrewer", version = "3.9")
 #BiocManager::install("apeglm", version = "3.9")
-
+#BiocManager::install("dplyr", version = "3.9")
+#BiocManager::install("ggplot2", version = "3.9")
 library("DESeq2")
 library("tximport")
 library("readr")
@@ -23,11 +24,8 @@ library("hexbin")
 library("pheatmap")
 library("RColorBrewer")
 library("apeglm")
-##BiocManager::install("dplyr", version = "3.9")
-##BiocManager::install("ggplot2", version = "3.9")
-#library("dplyr")
-#library("ggplot2")
-
+library("dplyr")
+library("ggplot2")
 
 
 ### Use Tximport to import data from Salmon
@@ -141,7 +139,6 @@ pheatmap(sampleDistMatrix,
          col = colors)
 
 dev.off()
-
 
 # Plot PCA of rlog transformed data with plotPCA
 # removed coord-fixed from plotPCA function ggplot
@@ -265,19 +262,18 @@ all_results <- merge(all_results, all_apeglmT, by = "gene_id")
 all_results <- merge(all_results, salmon_TPM, by = "gene_id")
 all_results$apeglm_log2FC <- all_results$apeglm_1_log2FC
 all_results$apeglm_lfcSE <- all_results$apeglm_1_lfcSE
-goi <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_svalue, apeglm_2_svalue, mean_INF_TPM, mean_STR_TPM)
-
-write.table(goi, "result_tables/E.festucae_E2368_STR_INF.txt", quote = FALSE, row.names = FALSE, sep = "\t")
 
 # identify significant DE
-targets_up <-  rownames(subset(all_results,(apeglm_2_svalue <.005 & apeglm_log2FC >= 1 ))) 
+targets_up <-  rownames(subset(all_results,(apeglm_1_svalue <=0.005 & apeglm_log2FC >= 1 ))) 
 all_results$up_2FC <- ifelse(rownames(all_results) %in% targets_up, 1, 0)
-targets_down <-  rownames(subset(all_results,(apeglm_2_svalue <.005 & apeglm_log2FC <= -1 )))
+targets_down <-  rownames(subset(all_results,(apeglm_1_svalue <=0.005 & apeglm_log2FC <= -1 )))
 all_results$down_2FC <- ifelse(rownames(all_results) %in% targets_down, 1, 0)
 
-sub_2FC <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_svalue, mean_INF_TPM, mean_STR_TPM, up_2FC, down_2FC)
 
-write.table(sub_2FC, "result_tables/E.festucae_E2368_STR_INF_2FC.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+### write to table
+goi <- all_results %>% select(gene_id, apeglm_log2FC, apeglm_lfcSE, apeglm_1_svalue, apeglm_2_svalue, mean_INF_TPM, mean_STR_TPM, up_2FC, down_2FC)
+write.table(goi, "result_tables/E.festucae_E2368_STR_INF.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+
 
 
 
