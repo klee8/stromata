@@ -51,3 +51,27 @@ Same as above for Epichloe DE but uses the Lolium perenne gene set from Dupont e
 #### Plant vs culture DE
 Same DE pipeline as above, but using the plant and culture data from Dupont et al., (2015).
 
+#### Comparative genomics analysis
+
+Look for presence of core genes from stromata DE analysis in a range of sexual and asexual Epichloe genomes
+data from Schardl, Young, Cox and Scott labs
++ Get genes sets from each of the genomes with exonerate and blast
++ Align with muscle
++ Manually check alignments
++ Graph presence/absence of stromata genes in each spp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
