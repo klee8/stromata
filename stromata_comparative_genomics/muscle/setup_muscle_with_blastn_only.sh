@@ -1,6 +1,5 @@
 #!usr/bin/bash
 
-TMP="/home/klee3/data/bin/samtools-1.10"
 mkdir blastn_upstream
 mkdir blastn_downstream
 mkdir blastn_query
@@ -26,13 +25,13 @@ do
             # correct for reverse strand
             if [ $ORIENTATION = "-" ]; then ORI="--reverse-complement"; else ORI=""; fi
             # grab alignment from samtools
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$START-$END $ORI --mark-strand sign >> blastn_query/$i.fna
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$START-$END $ORI --mark-strand sign >> blastn_query/$i.fna
             # get blastn_upstream and blastn_downstream sequence 
             if [ $ORIENTATION = "+" ]; then UP1=$(expr $START - 99); UP2=$(expr $START - 1); DOWN1=$(expr $END + 1); DOWN2=$(expr $END + 99);
             else UP1=$(expr $END + 1); UP2=$(expr $END + 99); DOWN1=$(expr $START - 99); DOWN2=$(expr $START - 1); fi
             #for dir in blastn_upstream blastn_downstream; do echo -e ">$LIFESTYLE B $j $CONTIG:$START-$END\n" >> $dir/$i.fna; done
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna 
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna 
             LENGTH=`expr $END - $START`
 #            echo -e "$i\t$j\t$ALIGN\t$ORIENTATION\t$CONTIG\t$UP1\t$UP2\t$START\t$END\t$DOWN1\t$DOWN2\t$LENGTH"
             # add in extra info into fasta header (including sexual/asexual/unknown, blastn_query tag and species name)
@@ -50,13 +49,13 @@ do
             # correct for reverse strand
             if [ $ORIENTATION = "-" ]; then ORI="--reverse-complement"; BEG=$START; START=$END; END=$BEG; else ORI=""; fi
             # grab alignment from samtools
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$START-$END $ORI --mark-strand sign >> blastn_query/$i.fna
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$START-$END $ORI --mark-strand sign >> blastn_query/$i.fna
             # get blastn_upstream and blastn_downstream sequence 
             if [ $ORIENTATION = "+" ]; then UP1=$(expr $START - 99); UP2=$(expr $START - 1); DOWN1=$(expr $END + 1); DOWN2=$(expr $END + 99);
             else UP1=$(expr $END + 1); UP2=$(expr $END + 99); DOWN1=$(expr $START - 99); DOWN2=$(expr $START - 1); fi
             #for dir in blastn_upstream blastn_downstream; do echo -e ">$LIFESTYLE B $j $CONTIG:$START-$END\n" >> $dir/$i.fna; done
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna
-            $TMP/samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna 
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna
+            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna 
             LENGTH=`expr $END - $START`
 #            echo -e "$i\t$j\t$ALIGN\t$ORIENTATION\t$CONTIG\t$UP1\t$UP2\t$START\t$END\t$DOWN1\t$DOWN2\t$LENGTH"
             # add in extra info into fasta header (including sexual/asexual/unknown, hit type and species name)
