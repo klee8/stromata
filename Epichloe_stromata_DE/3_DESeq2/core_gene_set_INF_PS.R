@@ -12,7 +12,7 @@ elymi <- read.delim(paste(resdir, "E.elymi_NfE728/result_tables/E.elymi_NfE728_I
 festucae <- read.delim(paste(resdir, "E.festucae_E2368/result_tables/E.festucae_E2368_INF_PS.txt", sep = ""), header = TRUE)
 
 # subset apeglm results
-keep <- c("gene_id", "apeglm_log2FC", "apeglm_lfcSE", "apeglm_1_svalue", "apeglm_2_svalue", "mean_INF_TPM", "mean_PS_TPM")
+keep <- c("gene_id", "apeglm_log2FC", "apeglm_lfcSE", "apeglm_1_svalue", "apeglm_2_svalue", "mean_INF_TPM", "mean_PS_TPM", "up_2FC", "down_2FC")
 elymi <- elymi[, keep]
 festucae <- festucae[, keep]
 
@@ -99,20 +99,20 @@ write.table(core_set, paste(resdir, "INF_PS/core_set_INF_PS.txt", sep = ""), quo
 
 rownames(core_set) <- core_set$gene_id
 
-listInput <- list(elymi_2Fold_up = rownames(core_set[core_set$elymi_apeglm_log2FC >= 1 & core_set$elymi_apeglm_1_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
+listInput <- list(elymi_2FC_up = rownames(core_set[core_set$elymi_apeglm_log2FC >= 1 & core_set$elymi_apeglm_1_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
                   #elymi_4Fold_up = rownames(core_set[core_set$elymi_apeglm_log2FC >= 2 & core_set$elymi_apeglm_2_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
-                  festucae_2Fold_up = rownames(core_set[core_set$festucae_apeglm_log2FC >= 1 & core_set$festucae_apeglm_1_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
+                  festucae_2FC_up = rownames(core_set[core_set$festucae_apeglm_log2FC >= 1 & core_set$festucae_apeglm_1_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
                   #festucae_4Fold_up = rownames(core_set[core_set$festucae_apeglm_log2FC >= 2 & core_set$festucae_apeglm_2_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
 
 
-                  elymi_2Fold_down = rownames(core_set[core_set$elymi_apeglm_log2FC <= -1 & core_set$elymi_apeglm_1_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
+                  elymi_2FC_down = rownames(core_set[core_set$elymi_apeglm_log2FC <= -1 & core_set$elymi_apeglm_1_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
                   #elymi_4Fold_down = rownames(core_set[core_set$elymi_apeglm_log2FC <= -2 & core_set$elymi_apeglm_2_svalue < 0.005 & !is.na(core_set$elymi_apeglm_log2FC), ]),
-                  festucae_2Fold_down = rownames(core_set[core_set$festucae_apeglm_log2FC <= -1 & core_set$festucae_apeglm_1_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
+                  festucae_2FC_down = rownames(core_set[core_set$festucae_apeglm_log2FC <= -1 & core_set$festucae_apeglm_1_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
                   #festucae_4Fold_down = rownames(core_set[core_set$festucae_apeglm_log2FC <= -2 & core_set$festucae_apeglm_2_svalue < 0.005 & !is.na(core_set$festucae_apeglm_log2FC), ]),
 
 
-                  core_up = rownames(core_set[core_set$core_2FC_up == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ]),
-                  core_down = rownames(core_set[core_set$core_2FC_down == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ]) #,
+                  core_2FC_up = rownames(core_set[core_set$core_2FC_up == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ]),
+                  core_2FC_down = rownames(core_set[core_set$core_2FC_down == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ]) #,
                   #top_up = rownames(core_set[core_set$top_2FC_up == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ]),
                   #top_down = rownames(core_set[core_set$top_2FC_down == 1 & !is.na(core_set$elymi_apeglm_log2FC) & !is.na(core_set$festucae_apeglm_log2FC), ])
 
@@ -125,30 +125,22 @@ metadata <- as.data.frame(cbind(sets, colors))
 
 #set_colors <- c(festucae_2Fold_down = "darkcyan",  elymi_2Fold_down = "darkcyan", festucae_4Fold_down = "darkcyan", elymi_4Fold_down = "darkcyan",  
 #                 core_down = "darkblue", top_down = "darkblue", festucae_2Fold_up = "purple", elymi_2Fold_up = "purple", festucae_4Fold_up = "purple", elymi_4Fold_up = "purple", core_up = "red", top_up = "red")    #   shade.color = colors
-set_colors <- c(festucae_2Fold_down = "darkcyan",  elymi_2Fold_down = "darkcyan", core_down = "darkblue", festucae_2Fold_up = "purple", elymi_2Fold_up = "purple", core_up = "red") 
+set_colors <- c(festucae_2FC_down = "darkcyan",  elymi_2FC_down = "darkcyan", core_2FC_down = "darkblue", festucae_2FC_up = "purple", elymi_2FC_up = "purple", core_2FC_up = "red") 
 
 pdf(paste(resdir, "INF_PS/UpSet_core_set_INF_PS.pdf", sep = ""), onefile = FALSE)
 #upset(fromList(listInput), sets = c("core_down", "core_up",  "top_down", "top_up"), keep.order = TRUE, order.by = "freq")
-upset(fromList(listInput), sets = c("core_down", "core_up"), keep.order = TRUE, order.by = "freq")
+upset(fromList(listInput), sets = c("core_2FC_down", "core_2FC_up"), keep.order = TRUE, order.by = "freq")
 dev.off()
 
 pdf(paste(resdir, "INF_PS/UpSet_all_FC_data_INF_PS.pdf", sep = ""), onefile = FALSE)
 #upset(fromList(listInput), sets = c("festucae_2Fold_down",  "elymi_2Fold_down", "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_down",  
 #                          "festucae_2Fold_up", "elymi_2Fold_up",   "festucae_4Fold_up", "elymi_4Fold_up", "core_up", "top_up"), 
-#                          keep.order = TRUE, order.by = "freq", nintersects = 50, set.metadata = list(data = metadata,
+#                          keep.order = TRUE, order.by = "freq", nintersects = 50, set.metadata = list(data = metadata,þ
 #                          plots = list(list(type = "matrix_rows", column = "sets", colors = set_colors, alpha = 0.5))))
-upset(fromList(listInput), sets = c("festucae_2Fold_down",  "elymi_2Fold_down", "core_down", "festucae_2Fold_up", "elymi_2Fold_up", "core_up"), 
+upset(fromList(listInput), sets = c("festucae_2FC_down",  "elymi_2FC_down", "core_2FC_down", "festucae_2FC_up", "elymi_2FC_up", "core_2FC_up"), 
                            keep.order = TRUE, order.by = "freq", nintersects = 50, set.metadata = list(data = metadata,
                            plots = list(list(type = "matrix_rows", column = "sets", colors = set_colors, alpha = 0.5))))
 dev.off()
-
-#pdf(paste(resdir, "INF_PS/UpSet_all_FC_data_up_INF_PS.pdf", sep = ""), onefile = FALSE)
-#upset(fromList(listInput), sets = c("festucae_2Fold_up", "elymi_2Fold_up",  "festucae_4Fold_up", "elymi_4Fold_up", "core_up", "top_up"), keep.order = TRUE, order.by = "freq")
-#dev.off()
-
-#pdf(paste(resdir, "INF_PS/UpSet_all_FC_data_down_INF_PS.pdf", sep = ""), onefile = FALSE)
-#upset(fromList(listInput), sets = c("festucae_2Fold_down",  "elymi_2Fold_down",  "festucae_4Fold_down", "elymi_4Fold_down",  "core_down","top_down"), keep.order = TRUE, order.by = "freq")
-#dev.off()
 
 
 
@@ -171,7 +163,7 @@ core_set <- merge(core_set, elymi_ann, by.x = "elymi_gene_id", by.y = "elymi_Gen
 core_set <- core_set[, c("orthogroup",   "num_spp", "m3", "elymi_gene_id",  "festucae_gene_id",   
                          "elymi_apeglm_log2FC",  "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue",   "elymi_mean_INF_TPM",  "elymi_mean_PS_TPM", 
                          "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE",  "festucae_apeglm_1_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM", 
-                         "core_up",  "core_down", 
+                         "core_2FC_up",  "core_2FC_down", "elymi_up_2FC", "elymi_down_2FC", "festucae_up_2FC", "festucae_down_2FC", 
                          "elymi_Feature", "elymi_Contig",  "elymi_Start",  "elymi_Stop", "elymi_Strand", "elymi_Name", "elymi_Product", 
                          "elymi_BUSCO", "elymi_PFAM", "elymi_InterPro", "elymi_EggNog", "elymi_COG", "elymi_GO.Terms", "elymi_Secreted", 
                          "elymi_Membrane", "elymi_Protease", "elymi_CAZyme", "elymi_Notes", "elymi_Translation",  "elymi_protein_length",  
@@ -188,51 +180,61 @@ core_set_pann <- core_set[, c("orthogroup", "num_spp", "m3", "elymi_gene_id", "f
                               "elymi_apeglm_1_svalue", #"elymi_apeglm_2_svalue",
                               "elymi_mean_INF_TPM", "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", 
                               "festucae_apeglm_1_svalue", # "festucae_apeglm_2_svalue", 
-                              "festucae_mean_INF_TPM", "festucae_mean_PS_TPM", "core_up", "core_down" #,
-                             #"top_4FC_up", "top_4FC_down",   "top_2FC_up",  "top_2FC_down"
+                              "festucae_mean_INF_TPM", "festucae_mean_PS_TPM", 
+                              "core_2FC_up",  "core_2FC_down", "elymi_up_2FC", "elymi_down_2FC", "festucae_up_2FC", "festucae_down_2FC"
                              )]      
 
 # add SignalP annotations
-signalP <- read.delim(paste(resdir, "../SignalP/E.elymi_NfE728_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+signalP <- read.delim(paste(resdir, "../data/SignalP/E.elymi_NfE728_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(signalP) <- c("gene_id", "Pr_signalP", "sigP_pos", "sigP_clev", "Pr_sigP_clev")
 signalP$gene_id <- gsub("-T1", "", signalP$gene_id)
 colnames(signalP) <- paste("el", colnames(signalP), sep = "_")
 core_set_pann <- merge(core_set_pann, signalP, by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-signalP <- read.delim(paste(resdir, "../SignalP/E.festucae_E2368_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+signalP <- read.delim(paste(resdir, "../data/SignalP/E.festucae_E2368_signalP.txt", sep = ""), header = FALSE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(signalP) <- c("gene_id", "Pr_signalP", "sigP_pos", "sigP_clev", "Pr_sigP_clev")
 signalP$gene_id <- gsub("-T1", "", signalP$gene_id)
 colnames(signalP) <- paste("fe", colnames(signalP), sep = "_")
 core_set_pann <- merge(core_set_pann, signalP, by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
 # add EffectorP annotations
-effectorP <- read.delim(paste(resdir, "../EffectorP/E.elymi_NfE728_effectorP.txt", sep = ""), header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+effectorP <- read.delim(paste(resdir, "../data/EffectorP/E.elymi_NfE728_effectorP.txt", sep = ""), header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(effectorP) <- c("gene_id", "effectorP", "efP_Pr")
 effectorP$gene_id <- gsub("-T1.*", "", effectorP$gene_id)
 colnames(effectorP) <- paste("el", colnames(effectorP), sep = "_")
 core_set_pann <- merge(core_set_pann, effectorP,  by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-effectorP <- read.delim(paste(resdir, "../EffectorP/E.festucae_E2368_effectorP.txt", sep = ""), header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
+effectorP <- read.delim(paste(resdir, "../data/EffectorP/E.festucae_E2368_effectorP.txt", sep = ""), header = TRUE, blank.lines.skip = TRUE, fill = TRUE, sep = "\t", comment.char = "#")
 colnames(effectorP) <- c("gene_id", "effectorP", "efP_Pr")
 effectorP$gene_id <- gsub("-T1.*", "", effectorP$gene_id)
 colnames(effectorP) <- paste("fe", colnames(effectorP), sep = "_")
 core_set_pann <- merge(core_set_pann, effectorP,  by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
 # add PANNZER DE annoations
-pannzer <- read.delim(paste(resdir, "../Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_DE.txt", sep = ""), header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+pannzer <- read.delim(paste(resdir, "../data/Pannzer/E.elymi_NfE728/E.elymi_NFE728_pannzer_DE.txt", sep = ""), header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 pannzer$gene_id <- gsub("-T1", "", pannzer$qpid)
 pan_keep <- pannzer[, c("gene_id", "desc", "genename")]
 colnames(pan_keep) <- c("gene_id", "pannzer_desc", "pannzer_genename")
 colnames(pan_keep) <- paste("el", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "elymi_gene_id", by.y = "el_gene_id", all = TRUE)
 
-pannzer <- read.delim(paste(resdir, "../Pannzer/E.festucae_E2368/E.festucae_E2368_pannzer_DE.txt", sep = ""), header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
+pannzer <- read.delim(paste(resdir, "../data/Pannzer/E.festucae_E2368/E.festucae_E2368_pannzer_DE.txt", sep = ""), header = TRUE, comment.char = "#", blank.lines.skip = TRUE, fill = TRUE, sep = "\t")
 pannzer$gene_id <- gsub("-T1", "", pannzer$qpid)
 pan_keep <- pannzer[, c("gene_id", "desc", "genename")]
 colnames(pan_keep) <- c("gene_id", "pannzer_desc", "pannzer_genename")
 colnames(pan_keep) <- paste("fe", colnames(pan_keep), sep = "_")
 core_set_pann <- merge(core_set_pann, pan_keep, by.x = "festucae_gene_id", by.y = "fe_gene_id", all = TRUE)
 
-core_set_pann <- core_set_pann[, c("orthogroup", "num_spp", "m3", "elymi_gene_id", "festucae_gene_id", "elymi_gene_id", "elymi_apeglm_log2FC", "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue", "elymi_apeglm_2_svalue", "elymi_mean_INF_TPM", "elymi_mean_PS_TPM", "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", "festucae_apeglm_1_svalue", "festucae_apeglm_2_svalue","festucae_mean_INF_TPM", "festucae_mean_PS_TPM", "core_up", "core_down", "top_4FC_up", "top_4FC_down", "top_2FC_up", "top_2FC_down", "el_Pr_signalP", "el_sigP_pos", "el_sigP_clev", "el_Pr_sigP_clev", "fe_Pr_signalP", "fe_sigP_pos", "fe_sigP_clev", "fe_Pr_sigP_clev", "el_effectorP", "el_efP_Pr", "fe_effectorP", "fe_efP_Pr", "el_pannzer_desc", "el_pannzer_genename", "fe_pannzer_desc", "fe_pannzer_genename")]
+core_set_pann <- core_set_pann[, c( "orthogroup", "num_spp","m3", "elymi_gene_id", "festucae_gene_id",
+                                    "elymi_apeglm_log2FC", "elymi_apeglm_lfcSE", "elymi_apeglm_1_svalue", "elymi_mean_INF_TPM", "elymi_mean_PS_TPM",
+                                    "festucae_apeglm_log2FC", "festucae_apeglm_lfcSE", "festucae_apeglm_1_svalue", "festucae_mean_INF_TPM", "festucae_mean_PS_TPM",
+                                    "core_2FC_up", "core_2FC_down", "elymi_up_2FC", "elymi_down_2FC", "festucae_up_2FC", "festucae_down_2FC",
+                                    "el_Pr_signalP", "el_sigP_pos", "el_sigP_clev", "el_Pr_sigP_clev",
+                                    "fe_Pr_signalP", "fe_sigP_pos", "fe_sigP_clev", "fe_Pr_sigP_clev",
+                                    "el_effectorP", "el_efP_Pr",
+                                    "fe_effectorP", "fe_efP_Pr",
+                                    "el_pannzer_desc","el_pannzer_genename",
+                                    "fe_pannzer_desc", "fe_pannzer_genename")]
+
 write.table(core_set_pann, paste(resdir, "INF_PS/core_gene_set_INF_PS_pannzer.txt", sep = ""), quote = FALSE, row.names = FALSE, sep = "\t")
 
