@@ -3,13 +3,13 @@
 mkdir blastn_upstream
 mkdir blastn_downstream
 mkdir blastn_query
-for i in `cat elymi_core_gene_names.txt`
-#for i in FUN_000430
-#for i in FUN_000205
+#for i in `cat elymi_core_gene_names.txt`
+for i in `cat control_gene_list.txt`
+#for i in FUN_000066
 do
-#    echo $i
-#    rm blastn_query/$i.positions.txt
-#    rm blastn_query/$i.fna
+    echo $i
+    rm blastn_query/$i.positions.txt
+    rm blastn_query/$i.fna
     echo "AlnType Gene Genome NumHits Contig Start End" > blastn_query/$i.positions.txt
     for j in `cat genome_tag_list.txt`
     do
@@ -67,5 +67,8 @@ do
     done
 done
 
-
+rm run_muscle.sh
+for i in `cat control_gene_list.txt`
+    do echo "screen -dmS $i muscle -in blastn_query/$i.fna -out blastn_align/$i.aln.fna" >> run_muscle.sh
+done
 
