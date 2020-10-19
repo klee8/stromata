@@ -4,7 +4,8 @@ mkdir blastn_upstream
 mkdir blastn_downstream
 mkdir blastn_query
 #for i in `cat elymi_core_gene_names.txt`
-for i in `cat control_gene_list.txt`
+#for i in `cat control_gene_list.txt`
+for i in `cat last_10_genelist.txt`
 #for i in FUN_000066
 do
     echo $i
@@ -54,8 +55,9 @@ do
             if [ $ORIENTATION = "+" ]; then UP1=$(expr $START - 99); UP2=$(expr $START - 1); DOWN1=$(expr $END + 1); DOWN2=$(expr $END + 99);
             else UP1=$(expr $END + 1); UP2=$(expr $END + 99); DOWN1=$(expr $START - 99); DOWN2=$(expr $START - 1); fi
             #for dir in blastn_upstream blastn_downstream; do echo -e ">$LIFESTYLE B $j $CONTIG:$START-$END\n" >> $dir/$i.fna; done
-            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna
-            samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna 
+            # note when the 
+            if [ $UP2 -ne 0 ]; then samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$UP1-$UP2 $ORI --mark-strand sign >> blastn_upstream/$i.fna; fi
+            if [ $DOWN2 -ne 0 ]; then samtools faidx ../exonerate/exonerate_genomes/$j.masked.fa $CONTIG:$DOWN1-$DOWN2 $ORI --mark-strand sign >> blastn_downstream/$i.fna; fi
             LENGTH=`expr $END - $START`
 #            echo -e "$i\t$j\t$ALIGN\t$ORIENTATION\t$CONTIG\t$UP1\t$UP2\t$START\t$END\t$DOWN1\t$DOWN2\t$LENGTH"
             # add in extra info into fasta header (including sexual/asexual/unknown, hit type and species name)
@@ -68,7 +70,8 @@ do
 done
 
 rm run_muscle.sh
-for i in `cat control_gene_list.txt`
+#for i in `cat control_gene_list.txt`
+for i in `cat last_10_genelist.txt`
     do echo "screen -dmS $i muscle -in blastn_query/$i.fna -out blastn_align/$i.aln.fna" >> run_muscle.sh
 done
 
