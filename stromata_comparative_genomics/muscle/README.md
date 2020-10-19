@@ -5,6 +5,8 @@
 
 
 ### setup files for alignment
++ note change list of genes in for loop as appropriate (e.g. core_gene_list, control_list, last_10)
+
 ```
 bash setup_muscle.sh
 ```
@@ -27,9 +29,16 @@ bash run_muscle.sh
 
 
 ### annotation
-```
++ note change list of genes in 3 for loop as appropriate (e.g. core_gene_list, control_list, last_10)
 
+```
+bash exon_info_blastn.sh
 ```
 + annotated exons with E. elymi NfE728 gff file
 + added 99 nt upstream and downstream of aligned sequence (to be able to to check for start and stop codons that are outside of the E. elymi NfE728 sequences)
++ results in blastn_ann_alns 
 
+
+
+#### TO DO
+Niceties: automate file in for loop from bash command line
