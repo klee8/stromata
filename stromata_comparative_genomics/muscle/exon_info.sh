@@ -1,20 +1,19 @@
 #!usr/bin/bash
 
 mkdir ann_alns
-    
+
+# add in elymi annotation line to each muscle alignment file
+# this will show where all the intron-exon boundaries are
 for i in `cat elymi_core_gene_names.txt`
-#for i in `cat long_list.txt`
-#for i in FUN_000115
-#for i in FUN_000205
 do
     echo  $i
     rm temp
-    # grab line from aln.fa file
+    # grab elymi line from aligned aln.fa file
     LINE=`cat align/$i.aln.fna | awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' | grep 'EelyNfE728' | cut -f 2`
-    # get positions of gaps in the line
+    # get positions of gaps in elymi
     POS=`cat align/$i.aln.fna | awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' | grep 'EelyNfE728' | cut -f 2 | grep -b -o '-' > gaps`
     sed -i 's/:-//g' gaps
-    # get sequence position from gff3 file
+    # get sequence positions of the elymi gene from gff3 file
     GENE=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $4":"$5}'`
     # get sequence orientation from gff3 file
     ORI=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $7}'`
@@ -22,17 +21,16 @@ do
     rm tmp_gff
     grep $i Epichloe_elymi_NfE728.gff3 | grep exon | awk '{print $4" "$5}' >> tmp_gff
     LENGTH=${#LINE}
+    # use insert_exon_info.pl perl script to create an annotation line for the muscle alignment (using elymi positions and including gaps)
     perl insert_exon_info.pl tmp_gff gaps $LENGTH $ORI $GENE > ann_alns/$i.ann.txt
+    # paste the annotation line into the alignment file
     cat temp align/$i.aln.fna > ann_alns/$i.ann.aln.fna
 done
-
-
 
 # sort fasta files into the same order
 cd ann_alns
 
 for i in `cat ../elymi_core_gene_names.txt`
-#for i in FUN_000205
 do
     # linearise the files
     awk '/^>/ {printf("%s%s\t",(N>0?"\n":""),$0);N++;next;} {printf("%s",$0);} END {printf("\n");}' < $i.ann.aln.fna > $i.aln.lin.fna
@@ -61,7 +59,6 @@ rm ann_alns/*.ann.aln.fna
 for i in ann_alns/*.fna; do sed -i 's/ /_/g' $i; done
 for i in upstream/*.fna; do sed -i 's/ /_/g' $i; done
 for i in downstream/*.fna; do sed -i 's/ /_/g' $i; done
-
 
 # add fasta with upstream and downstream sequences
 # pad up and downstream strings to ensure alignment is not displaced

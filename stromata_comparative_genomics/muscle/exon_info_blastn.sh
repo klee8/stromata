@@ -1,11 +1,14 @@
-#!usr/bin/bash
+ #!usr/bin/bash
 
 mkdir blastn_ann_alns
 
 
 
-# grab the exon annotations from the gff file and add an annotation line to the alignment
-for i in `cat elymi_core_gene_names.txt`
+# grab the elymi exon annotations from the gff file and add an annotation line to the alignment
+# this will help identify intron-exon boundaries
+#for i in `cat elymi_core_gene_names.txt`
+#for i in `cat control_gene_list.txt`
+for i in `cat last_10_genelist.txt`
 do
     echo  $i
     rm temp
@@ -22,7 +25,9 @@ do
     rm tmp_gff
     grep $i Epichloe_elymi_NfE728.gff3 | grep exon | awk '{print $4" "$5}' >> tmp_gff
     LENGTH=${#LINE}
+    # use perl script to create annotation line
     perl insert_exon_info.pl tmp_gff gaps $LENGTH $ORI $GENE > blastn_ann_alns/$i.blastn_ann.txt
+    # paste new annotation line into muscle alignment
     cat temp blastn_align/$i.aln.fna > blastn_ann_alns/$i.blastn_ann.aln.fna
 #    cat temp
 done
@@ -32,7 +37,9 @@ done
 # sort fasta files into the same order
 cd blastn_ann_alns
 
-for i in `cat ../elymi_core_gene_names.txt`
+#for i in `cat ../elymi_core_gene_names.txt`
+#for i in `cat ../control_gene_list.txt`
+for i in `cat ../last_10_genelist.txt`
 #for i in FUN_000205
 do
     # linearise the files
@@ -69,7 +76,9 @@ for i in blastn_downstream/*.fna; do sed -i 's/ /_/g' $i; done
 # https://stackoverflow.com/questions/4409399/padding-characters-in-printf
 padlength=99
 pad="---------------------------------------------------------------------------------------------------"
-for i in `cat elymi_core_gene_names.txt`
+#for i in `cat elymi_core_gene_names.txt`
+#for i in `cat control_gene_list.txt`
+for i in `cat last_10_genelist.txt`
 #for i in FUN_000205
 do
     # linearise the sorted blastn_alignment and the up and blastn_downstream files
@@ -92,8 +101,4 @@ do
     # change updown.lin.fna to fasta format
     tr "\t" "\n" < blastn_ann_alns/$i.updown.lin.fna > blastn_ann_alns/$i.updown.fna
 done
-
-#rm blastn_ann_alns/*.lin.fna
-#rm blastn_upstream/*.lin.fna
-#rm blastn_downstream/*.lin.fna
 
