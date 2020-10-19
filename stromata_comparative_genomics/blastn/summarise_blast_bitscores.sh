@@ -8,7 +8,8 @@ rm all_bitscores.txt
 # get the best hits
 for i in `cat genome_tag_list.txt`; 
 # do for j in `cat elymi_core_gene_names.txt`; 
-  do for j in `cat control_gene_list.txt`
+#  do for j in `cat control_gene_list.txt`
+ do for j in `cat 10_last_genes/last_10_genelist.txt`
     do grep -m 1 $j $i/$i.aln.txt >> $i/$i.bestaln.txt ; done; done 
 
 # paste the bitscores into one file
