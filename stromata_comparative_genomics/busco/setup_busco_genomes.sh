@@ -29,3 +29,6 @@ echo "mkdir BUSCO_summaries" >> run_busco_docker.sh
 for i in `cat genome_tag_list.txt`;
  do echo "cp genome_results/$i/short_summary.specific*.txt  BUSCO_summaries; done" >> run_busco_docker.sh; done
 echo "python busco-4.1.2/scripts/generate_plot.py -wd BUSCO_summaries/" >> run_busco_docker.sh
+
+
+
