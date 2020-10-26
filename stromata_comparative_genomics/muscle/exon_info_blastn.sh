@@ -19,13 +19,16 @@ do
     sed -i 's/:-//g' gaps
     # get sequence position from gff3 file
     GENE=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $4":"$5}'`
+    #GENE=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $4":"$5}'`    # alt for last 10 genes with new models
     # get sequence orientation from gff3 file
     ORI=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $7}'`
+    #ORI=`grep $i Epichloe_elymi_NfE728.gff3 | grep gene | awk '{print $7}'`   # alt for last 10 genes with new models
     # grab exon info from gff3 file
     rm tmp_gff
     grep $i Epichloe_elymi_NfE728.gff3 | grep exon | awk '{print $4" "$5}' >> tmp_gff
+    #grep $i Epichloe_elymi_NfE728.gff3 | grep exon | awk '{print $4" "$5}' >> tmp_gff   # alt for last 10 genes with new models
     LENGTH=${#LINE}
-    # use perl script to create annotation line
+    # use perl script to create annotation line (creates 'temp' file)
     perl insert_exon_info.pl tmp_gff gaps $LENGTH $ORI $GENE > blastn_ann_alns/$i.blastn_ann.txt
     # paste new annotation line into muscle alignment
     cat temp blastn_align/$i.aln.fna > blastn_ann_alns/$i.blastn_ann.aln.fna

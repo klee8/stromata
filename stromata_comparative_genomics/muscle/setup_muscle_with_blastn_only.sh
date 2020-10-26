@@ -6,7 +6,6 @@ mkdir blastn_query
 #for i in `cat elymi_core_gene_names.txt`
 #for i in `cat control_gene_list.txt`
 for i in `cat last_10_genelist.txt`
-#for i in FUN_000066
 do
     echo $i
     rm blastn_query/$i.positions.txt
@@ -21,13 +20,6 @@ do
             START=`grep -m 1 $i Epichloe_elymi_NfE728.gff3 | awk '{print $4}'` 
             END=`grep -m 1 $i Epichloe_elymi_NfE728.gff3 | awk '{print $5}'`
             ORIENTATION=`grep -m 1 $i Epichloe_elymi_NfE728.gff3 | awk '{print $7}'`
-
-            # use the new Epichloe elymi gene models from Dan for last 10 genes
-            #CONTIG=`grep -m 1 $i all_new_Eel_genes.gff | awk '{print $1}'`
-            #START=`grep -m 1 $i all_new_Eel_genes.gff | awk '{print $4}'` 
-            #END=`grep -m 1 $i all_new_Eel_genes.gff | awk '{print $5}'`
-            #ORIENTATION=`grep -m 1 $i all_new_Eel_genes.gff | awk '{print $7}'`
-
             ALIGN="NONE"
             echo "$ALIGN $i $j $NUMHITS $CONTIG $START $END" >> blastn_query/$i.positions.txt
             # correct for reverse strand

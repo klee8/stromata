@@ -2,10 +2,11 @@
 ### elsewhere:
 + in exonerate folder: 
 + in blastn folder: Took E. elymi NfE728 nuclotide sequences for core genes (positions from gff file) and used blastn to find homologs in all genomes.
-
++ added new gene models to E. elymi gff3 file
 
 ### setup files for alignment
 + note change list of genes in for loop as appropriate (e.g. core_gene_list, control_list, last_10)
++ note scripts assume 'gene' annotation will be the first annotation for each gene in the gff file (note- genious outputs CDS first)
 
 ```
 bash setup_muscle.sh
