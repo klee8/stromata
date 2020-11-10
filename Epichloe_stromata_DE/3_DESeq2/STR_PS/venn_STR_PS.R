@@ -2,7 +2,7 @@
 # create a venn diagram of stromata DE genes
 # adapted from https://flowingdata.com/2018/01/10/how-to-make-venn-diagrams-in-r/
 
-install.packages("VennDiagram")
+#install.packages("VennDiagram")
 library(VennDiagram)
 
 # could use polyclip afterwards to manually set colours of intersections
